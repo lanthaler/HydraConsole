@@ -3,7 +3,57 @@
 <head>
   <title>Hydra Console</title>
   <meta charset="utf-8" />
+  <link href="css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
+  <div class="container-fluid">
+    <div class="page-header">
+      <h1>Hydra Console</h1>
+    </div>
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="row-fluid">
+          <div class="span12">
+            <form id="addressbar" class="navbar-form form-inline">
+              <label for="url">Enter an URL:</label>
+              <div class="input-append">
+                <input id="url" type="text" class="input-xxlarge" placeholder="http://" value="http://hydra.test/">
+                <button id="load" class="btn btn-inverse"><i class="icon-refresh icon-white"></i> Load</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row-fluid">
+      <div class="span6">
+        <h4>Response</h4>
+        <pre id="response">
+        Response
+        </pre>
+      </div>
+      <div id="documentation" class="span6">
+        <div class="container">
+          <h4 class="pull-left">Documentation:&nbsp;</h4>
+          <div class="dropdown pull-left">
+            <a class="dropdown-toggle" data-toggle="dropdown" data-trigger="hover" href="#"><h4><span id="documentation-title">Type</span> <b class="caret"></b></h4></a>
+            <ul class="dropdown-menu">
+              <li><a href="#">Category</a></li>
+              <li><a href="#">Comment</a></li>
+              <li><a href="#">Home</a></li>
+              <li><a href="#">Tag</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div id="documentation-details">
+          <p>Documentation details</p>
+      </div>
+    </div>
+  </div>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.1.1/bootstrap.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.2/underscore-min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/0.9.2/backbone-min.js"></script>
 </body>
 </html>
