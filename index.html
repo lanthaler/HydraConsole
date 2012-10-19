@@ -48,7 +48,7 @@
               <label for="url">Enter an URL:</label>
               <div class="input-append">
                 <input id="url" type="text" class="input-xxlarge" placeholder="http://" value="http://hydra.test/">
-                <button id="load" class="btn btn-inverse"><i class="icon-refresh icon-white"></i> Load</button>
+                <button id="load" class="btn btn-inverse" data-loading-text="Loading..."><i class="icon-refresh icon-white"></i> Load</button>
               </div>
             </form>
           </div>
@@ -134,9 +134,18 @@
       </div>
     </form>
   </div>
+  <div id="jqxhr-fail-template" style="display:none">
+      <pre>
+  <%= jqxhr.status %> <%= jqxhr.statusText %>
+
+  <%= jqxhr.getAllResponseHeaders() %>
+      </pre>
+  </div>
+
   <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.1.1/bootstrap.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.2/underscore-min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/0.9.2/backbone-min.js"></script>
+  <script src="js/hydra.js"></script>
 </body>
 </html>
