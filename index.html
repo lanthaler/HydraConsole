@@ -58,15 +58,43 @@
     <div class="row-fluid">
       <div class="span6">
         <h4>Response</h4>
-        <pre id="response">
-        Response
-        </pre>
+        <!-- <div class="btn-group pull-right">
+          <a class="btn btn-info btn-small dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-globe icon-white"></i></a>
+          <ul class="dropdown-menu">
+            <li><a href="#">Category</a></li>
+            <li><a href="#">Comment</a></li>
+            <li><a href="#">Home</a></li>
+            <li><a href="#">Tag</a></li>
+          </ul>
+        </div> -->
+    <!--<div class="alert">
+       <button type="button" class="close" data-dismiss="alert">&times;</button>
+      <strong>Warning</strong>
+    </div>-->
+<pre id="response">
+Hi,
+
+This is the Hydra Console. This field here will show you retrieved responses
+In the pane to the right you'll find the corresponding documentation.
+
+When you move your mouse over a property, the corresponding item in the
+documentation will be highlighted. Additionally, a tooltip with the full IRI
+of the property will be shown. If you move your mouse over a context
+definition, the active context at that level will be shown.
+
+All links are blue and underlined. To invoke an operation, simply click on
+it and follow the instructions.
+
+We've had enough of words :-) To get started, enter a URL in the addressbar
+above and click on &quot;Load&quot;
+</pre>
+
       </div>
       <div id="documentation" class="span6">
         <div class="container">
           <h4 class="pull-left">Documentation:&nbsp;</h4>
           <div class="dropdown pull-left">
-            <a class="dropdown-toggle" data-toggle="dropdown" data-trigger="hover" href="#"><h4><span id="documentation-title">Type</span> <b class="caret"></b></h4></a>
+            <a class="dropdown-toggle" data-toggle="dropdown" data-trigger="hover" href="#"><h4><span id="documentation-title"></span><!-- <b class="caret"></b>--></h4></a>
             <ul class="dropdown-menu">
               <li><a href="#">Category</a></li>
               <li><a href="#">Comment</a></li>
@@ -77,7 +105,7 @@
         </div>
 
         <div id="documentation-details">
-          <p>Documentation details <a href="#operationsModal" data-toggle="modal">operations</a></p>
+          <p>Move your mouse over a property in the response to the left to show it's documentation.</p>
       </div>
     </div>
   </div>
@@ -134,6 +162,42 @@
       </div>
     </form>
   </div>
+
+  <script id="documentation-template" style="display:none">
+    <p><%= description %></p>
+    <table class="table table-hover">
+      <tbody>
+        <tr>
+          <th width="50">@id</th>
+          <td width="50">
+            <code>@id</code>
+            <br /><small class="muted">readonly</small>
+          </td>
+          <td>
+            This entity&#039;s IRI
+            <% if (operations.length > 0) { %>
+            <p><a class="btn btn-link btn-small dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-tags icon"></i> Operations</a></p>
+            <% } %>
+          </td>
+        </tr>
+        <% _.each(properties, function(property) { %>
+        <tr id="<%= property['@id'] %>">
+          <th><%= property.short_name %></th>
+          <td>
+            <code><%= property.range %></code>
+            <% if (property.readonly) { %><br /><small class="muted">readonly</small><% } %>
+            <% if (property.writeonly) { %><br /><small class="muted">writeonly</small><% } %>
+          </td>
+          <td>
+            <%= property.label %><%= property.description %><% if (property.operations.length > 0) { %><br />
+            <a class="btn btn-link btn-small dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-tags icon"></i> Operations</a>
+            <% } %>
+          </td>
+        </tr>
+        <% }); %>
+        </tbody>
+      </table>
+  </script>
   <div id="jqxhr-fail-template" style="display:none">
       <pre>
   <%= jqxhr.status %> <%= jqxhr.statusText %>

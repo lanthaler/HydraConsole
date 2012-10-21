@@ -150,7 +150,34 @@
   Hydra.Views.Documentation = Backbone.View.extend({
     el: $("#documentation"),
     title: $("#documentation-title"),
-    details: $("#documentation-details")
+    details: $("#documentation-details"),
+    template: _.template($('#documentation-template').html()),
+
+    initialize: function() {
+      this.model.bind('change:type', this.render, this);
+    },
+
+    /*events: {
+      "click .icon":          "open",
+      "click .button.edit":   "openEditDialog",
+      "click .button.delete": "destroy"
+    },*/
+
+    render: function() {
+      var type = this.model.get('type');
+      if (null === type) {
+        this.title.html('');
+        this.details.html('<p>Loading ...</p>');
+      } else if (false === type) {
+        this.title.html('');
+        this.details.html('<p>Loading the documentation failed.</p>');
+      } else {
+        this.title.html(_.escape(type.short_name));
+        this.details.html(this.template(type));
+      }
+      return this;
+    }
+
   });
 
   var documentationModel = new Hydra.Models.Documentation();
@@ -195,12 +222,63 @@
 
         self.response.model.set({ data: resource });
         self.addressbar.setUrl(url);
+
+        if (_.isObject(resource) && ('@type' in resource)) {
+          self.showDocumentation(resource['@type'].__value.__value['@id']);
+        }
       }).error(function() {
         alert('Request failed');
         self.vent.trigger('fail-response', { jqxhr: jqxhr });
       }).complete(function() {
         $('#load').addClass('btn-inverse');
       });
+    },
+
+    showDocumentation: function(url) {
+      var self = this;
+
+      if ((undefined === url) || (null === url)) {
+        return;
+      }
+
+      var vocabUrl = url.split('#', 2)[0];
+
+      if (vocabUrl === self.documentation.model.get('vocabUrl')) {
+        var vocab = self.documentation.model.get('vocab');
+        self.documentation.model.set({ 'type' : self.findType(vocab, url) });
+
+        return;
+      }
+
+      self.documentation.model.set({ 'type' : null });
+
+      var jqxhr = $.getJSON('proxy.php', { 'url': vocabUrl }, function(resource) {
+        //self.vent.trigger('response', { resource: resource });
+        var vocab = resource['@graph'];
+        var type = self.findType(vocab, url);
+
+        self.documentation.model.set({ 'type' : type, 'vocab': vocab, 'vocabUrl': vocabUrl });
+      }).error(function() {
+        self.documentation.model.set({ 'type' : false, 'vocab': null, 'vocabUrl': null });
+      });
+    },
+
+    findType: function(vocab, url) {
+      var type = _.find(vocab, function(entry) {
+        return entry['@id'] === url;
+      });
+
+      if ('rdfs:Class' !== type['@type']) {
+        type = _.find(vocab, function(entry) {
+          return entry['@id'] === type.domain;
+        });
+      }
+
+      type.properties = _.filter(vocab, function(entry) {
+        return entry['domain'] === type['@id'];
+      });
+
+      return type;
     }
   };
 
@@ -214,6 +292,27 @@
 $('#addressbar').on("submit", function () {
     window.HydraClient.get();
     return false;
+  })
+;
+
+$('#response').on("mouseenter", ".prop", function () {
+    var property = $(this).attr('data-original-title') || $(this).attr('title');
+
+    if (property && (0 === property.indexOf('http://'))) {
+      window.HydraClient.showDocumentation(property);
+
+      if (document.getElementById(property)) {
+        $(document.getElementById(property)).addClass("prop-highlight");
+      }
+    }
+  })
+;
+
+$('#response').on("mouseleave", ".prop", function () {
+    var property = $(this).attr('data-original-title') || $(this).attr('title');
+    if (property && document.getElementById(property)) {
+      $(document.getElementById(property)).removeClass("prop-highlight");
+    }
   })
 ;
 
@@ -236,5 +335,7 @@ $('#addressbar').on("submit", function () {
 
 
 $(document).ready(function() {
+  window.HydraClient.showDocumentation();
+  //window.HydraClient.get('http://hydra.test/users/1');
   $('#url').focus();
 });
