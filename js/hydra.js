@@ -59,14 +59,28 @@
       var $target = $(e.target);
       var uri = $target.attr('href') || $target.parent().attr('href');
 
-      this.operationsModal.modal('show');
+      var element = $target;
+      var property = null;
+      do {
+        if (element.hasClass('prop') && element.attr('data-iri') && '@id' !== element.attr('data-iri')) {
+          property = element.attr('data-iri');
+          break;
+        }
 
-      window.HydraClient.get(uri);
+        element = element.parent();
+      } while ('response' !== element.attr('id'));
+
+      // If the property is the value of a keyword, simply GET it, otherwise show dialog
+      if ((null !== property) && ('@' === property[0])) {
+        window.HydraClient.get(uri);
+      } else {
+        this.operationsModal.modal('show');
+      }
     },
 
     render: function() {
       this.$el.html(this.renderResponse(this.model.get('data'), '', false));
-      $('.prop').tooltip({ 'placement': 'right' });
+      $('.prop-key').tooltip({ 'placement': 'right' });
       $('.context').popover( {
         'trigger': 'hover',
         'placement': 'right',
@@ -127,11 +141,13 @@
             result += '<br>';
           } else {
             if ('__iri' in value) {
-              result += '&quot;<span class="prop" title="' + _.escape(value.__iri) + '">' + _.escape(key);
+              result += '<span class="prop" data-iri="' + _.escape(value.__iri);
+              result += '">&quot;<span class="prop-key" title="' + _.escape(value.__iri) + '">' + _.escape(key);
               result += '</span>&quot;: ';
             }
 
             result += this.renderResponse(value.__value, indent + '  ',  (i === keys.length - 1));
+            result += '</span>';
           }
         }
         result += indent + '}';
@@ -296,7 +312,7 @@ $('#addressbar').on("submit", function () {
 ;
 
 $('#response').on("mouseenter", ".prop", function () {
-    var property = $(this).attr('data-original-title') || $(this).attr('title');
+    var property = $(this).attr('data-iri');
 
     if (property && (0 === property.indexOf('http://'))) {
       window.HydraClient.showDocumentation(property);
@@ -309,7 +325,7 @@ $('#response').on("mouseenter", ".prop", function () {
 ;
 
 $('#response').on("mouseleave", ".prop", function () {
-    var property = $(this).attr('data-original-title') || $(this).attr('title');
+    var property = $(this).attr('data-iri');
     if (property && document.getElementById(property)) {
       $(document.getElementById(property)).removeClass("prop-highlight");
     }
