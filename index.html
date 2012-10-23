@@ -208,7 +208,7 @@ above and click on &quot;Load&quot;
   </div>
 
   <script id="documentation-template" style="display:none">
-    <p><%= description %></p>
+    <p><%= docu.description %></p>
     <table class="table table-hover">
       <tbody>
         <tr>
@@ -219,12 +219,12 @@ above and click on &quot;Load&quot;
           </td>
           <td>
             This entity&#039;s IRI
-            <% if (operations.length > 0) { %>
-            <p><a class="btn btn-link btn-small dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-tags icon"></i> Operations</a></p>
+            <% if (docu.operations.length > 0) { %>
+            <p><a class="btn btn-link btn-small operations" data-iri="<%- docu['@id'] %>" href="#"><i class="icon-tags icon"></i> Operations</a></p>
             <% } %>
           </td>
         </tr>
-        <% _.each(properties, function(property) { %>
+        <% _.each(docu.properties, function(property) { %>
         <tr id="<%= property['@id'] %>">
           <th><%= property.short_name %></th>
           <td>

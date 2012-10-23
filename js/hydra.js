@@ -228,7 +228,7 @@
         this.details.html('<p>Loading the documentation failed.</p>');
       } else {
         this.title.html(_.escape(type.short_name));
-        this.details.html(this.template(type));
+        this.details.html(this.template({ 'docu': type }));
       }
       return this;
     }
