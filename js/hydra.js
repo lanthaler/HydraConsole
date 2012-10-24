@@ -9,11 +9,32 @@
 
 
   Hydra.Models.Documentation = Backbone.Model.extend({
-    promptColor: function() {
-      var cssColor = prompt("Please enter a CSS color:");
-      this.set({color: cssColor});
-    }
+    getTypeDefinition: function(url, vocab) {
+      var type = this.getElementDefinition(url);
+
+      if ('rdfs:Class' !== type['@type']) {
+        type = this.getElementDefinition(type.domain);
+      }
+
+      var vocab = vocab || this.get('vocab');
+      type.properties = _.filter(vocab, function(entry) {
+        return entry['domain'] === type['@id'];
+      });
+
+      return type;
+    },
+
+    getElementDefinition: function(url, vocab) {
+      var vocab = vocab || this.get('vocab');
+
+      var element = _.find(vocab, function(entry) {
+        return entry['@id'] === url;
+      });
+
+      return element;
+    },
   });
+
 
   Hydra.Models.OperationsModal = Backbone.Model.extend({
     update: function(operations, target) {
@@ -105,9 +126,13 @@
         return;
       }
 
-      // If the property is the value of a keyword, simply GET it, otherwise show dialog
+      // If the property is the value of a keyword GET it (or show the @type documentation), otherwise show dialog
       if ('@' === property[0]) {
-        window.HydraClient.get(uri);
+        if ('@type' === property) {
+          window.HydraClient.showDocumentation(uri);
+        } else {
+          window.HydraClient.get(uri);
+        }
       } else {
         window.HydraClient.showOperationsModal(property, uri);
       }
@@ -231,7 +256,9 @@
         this.details.html('<p>Loading the documentation failed.</p>');
       } else {
         this.title.html(_.escape(type.short_name));
-        this.details.html(this.template({ 'docu': type }));
+        this.details.html(this.template({
+          'docu': this.model.getTypeDefinition(this.model.get('type'))
+        }));
       }
       return this;
     }
@@ -335,8 +362,7 @@
       var vocabUrl = url.split('#', 2)[0];
 
       if (vocabUrl === self.documentation.model.get('vocabUrl')) {
-        var vocab = self.documentation.model.get('vocab');
-        self.documentation.model.set({ 'type' : self.findType(vocab, url) });
+        self.documentation.model.set({ 'type' : url });
 
         return;
       }
@@ -345,39 +371,13 @@
 
       var jqxhr = $.getJSON('proxy.php', { 'url': vocabUrl }, function(resource) {
         //self.vent.trigger('response', { resource: resource });
+        // TODO Merge the vocabulary into the documentation model
         var vocab = resource['@graph'];
-        var type = self.findType(vocab, url);
 
-        self.documentation.model.set({ 'type' : type, 'vocab': vocab, 'vocabUrl': vocabUrl });
+        self.documentation.model.set({ 'type' : url, 'vocab': vocab, 'vocabUrl': vocabUrl });
       }).error(function() {
         self.documentation.model.set({ 'type' : false, 'vocab': null, 'vocabUrl': null });
       });
-    },
-
-    findType: function(vocab, url) {
-      var type = _.find(vocab, function(entry) {
-        return entry['@id'] === url;
-      });
-
-      if ('rdfs:Class' !== type['@type']) {
-        type = _.find(vocab, function(entry) {
-          return entry['@id'] === type.domain;
-        });
-      }
-
-      type.properties = _.filter(vocab, function(entry) {
-        return entry['domain'] === type['@id'];
-      });
-
-      return type;
-    },
-
-    findElement: function(vocab, url) {
-      var element = _.find(vocab, function(entry) {
-        return entry['@id'] === url;
-      });
-
-      return element;
     },
 
     showOperationsModal: function(property, target) {
@@ -395,8 +395,7 @@
       var vocabUrl = property.split('#', 2)[0];
 
       if (vocabUrl === self.documentation.model.get('vocabUrl')) {
-        var vocab = self.documentation.model.get('vocab');
-        property = self.findElement(vocab, property);
+        property = self.documentation.model.getElementDefinition(property);
 
         if ('operations' in property) {
           self.operationsModal.model.update(property.operations, target);
@@ -410,8 +409,9 @@
       }
 
       var jqxhr = $.getJSON('proxy.php', { 'url': vocabUrl }, function(resource) {
+        // TODO Merge the vocabulary into the documentation model
         var vocab = resource['@graph'];
-        property = self.findElement(vocab, property);
+        property = self.documentation.model.getElementDefinition(property, vocab);
 
         if ('operations' in property) {
           self.operationsModal.model.update(property.operations, target);
