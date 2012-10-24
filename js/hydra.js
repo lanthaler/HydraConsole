@@ -271,22 +271,16 @@
   });
 
 
-  var documentationModel = new Hydra.Models.Documentation();
-
   Hydra.Client = {
     addressbar: new Hydra.Views.AddressBar(),
-    documentationView: new Hydra.Views.Documentation( {
-      model: documentationModel
-    }),
-    documentationModel: documentationModel,
     documentation: {},
     response: {},
     operationsModal: { widget: $('#operationsModal') },
 
     initialize: function() {
       $.ajaxSetup({
-       headers: { 'Accept': 'application/ld+json, application/json;q=0.1' }//,
-       //cache: false
+       headers: { 'Accept': 'application/ld+json, application/json;q=0.1' }/*,
+       cache: false*/
       });
 
       this.documentation.model = new Hydra.Models.Documentation();
