@@ -15,10 +15,41 @@
     }
   });
 
-  Hydra.Models.OperationModal = Backbone.Model.extend({
-    promptColor: function() {
-      var cssColor = prompt("Please enter a CSS color:");
-      this.set({color: cssColor});
+  Hydra.Models.OperationsModal = Backbone.Model.extend({
+    update: function(operations, target) {
+      if (target) {
+        operations = _.union(operations, [
+          { "method": "GET", "default": true },
+          { "method": "POST", "default": true },
+          { "method": "PUT", "default": true },
+          { "method": "DELETE", "default": true },
+          { "method": "PATCH", "default": true }
+        ]);
+      }
+
+      var methodSortOrder = {
+        'GET':     2,
+        'POST':    4,
+        'PUT':     6,
+        'DELETE':  8,
+        'PATCH':  10
+      };
+
+      operations = _.sortBy(operations, function(operation) {
+        return methodSortOrder[operation.method] + ((operation.default) ? -1 : 0);
+      });
+
+      var length = operations.length;
+      var method = operations[length - 1].method;
+      for (var i = length -2; i >= 0; i--) {
+        if ((true === operations[i].default) && (method === operations[i].method)) {
+          operations.splice(i, 1);
+        } else {
+          method = operations[i].method;
+        }
+      }
+
+      this.set({ 'operations': operations, 'target': target, 'selected': null ,});
     }
   });
 
@@ -44,7 +75,6 @@
 
   Hydra.Views.Response = Backbone.View.extend({
     el: $("#response"),
-    operationsModal: $('#operationsModal'),
 
     events: {
       'click a': 'clickLink'
@@ -70,11 +100,16 @@
         element = element.parent();
       } while ('response' !== element.attr('id'));
 
+      if (null == property) {
+        alert('Failed to find property associated with this IRI');
+        return;
+      }
+
       // If the property is the value of a keyword, simply GET it, otherwise show dialog
-      if ((null !== property) && ('@' === property[0])) {
+      if ('@' === property[0]) {
         window.HydraClient.get(uri);
       } else {
-        this.operationsModal.modal('show');
+        window.HydraClient.showOperationsModal(property, uri);
       }
     },
 
@@ -171,6 +206,10 @@
 
     initialize: function() {
       this.model.bind('change:type', this.render, this);
+
+      this.details.on("click", ".operations", function () {
+        window.HydraClient.showOperationsModal($(this).attr('data-iri'), null);
+      });
     },
 
     /*events: {
@@ -196,6 +235,39 @@
 
   });
 
+
+  Hydra.Views.OperationsModal = Backbone.View.extend({
+    el: $("#operationsModal"),
+    body: $("#operationsModal"),
+    template: _.template($('#operationsModal-template').html()),
+
+    initialize: function() {
+      this.model.bind('change', this.render, this);
+
+      $('#operationsModal-template').remove();
+    },
+
+    /*events: {
+      "click .icon":          "open",
+      "click .button.edit":   "openEditDialog",
+      "click .button.delete": "destroy"
+    },*/
+
+    render: function() {
+      var self = this;
+
+      self.body.html(self.template(self.model.toJSON()));
+
+      self.body.on("click", ".operation", function () {
+        self.model.set({ 'selected': $(this).attr('data-index') });
+      });
+
+      return this;
+    }
+
+  });
+
+
   var documentationModel = new Hydra.Models.Documentation();
 
   Hydra.Client = {
@@ -206,6 +278,7 @@
     documentationModel: documentationModel,
     documentation: {},
     response: {},
+    operationsModal: { widget: $('#operationsModal') },
 
     initialize: function() {
       $.ajaxSetup({
@@ -221,6 +294,11 @@
       this.response.model = new Hydra.Models.Response();
       this.response.view = new Hydra.Views.Response({
         model: this.response.model
+      });
+
+      this.operationsModal.model = new Hydra.Models.OperationsModal();
+      this.operationsModal.view = new Hydra.Views.OperationsModal({
+        model: this.operationsModal.model
       });
 
       return this;
@@ -295,6 +373,59 @@
       });
 
       return type;
+    },
+
+    findElement: function(vocab, url) {
+      var element = _.find(vocab, function(entry) {
+        return entry['@id'] === url;
+      });
+
+      return element;
+    },
+
+    showOperationsModal: function(property, target) {
+      var self = this;
+
+      // Operations can
+      //    - be associated with the type
+      //    - or the property
+      //    - or be expressed in-line
+
+      if ((undefined === property) || (null === property)) {
+        return;
+      }
+
+      var vocabUrl = property.split('#', 2)[0];
+
+      if (vocabUrl === self.documentation.model.get('vocabUrl')) {
+        var vocab = self.documentation.model.get('vocab');
+        property = self.findElement(vocab, property);
+
+        if ('operations' in property) {
+          self.operationsModal.model.update(property.operations, target);
+        } else {
+          self.operationsModal.model.update(null, target);
+        }
+
+        self.operationsModal.widget.modal('show');
+
+        return;
+      }
+
+      var jqxhr = $.getJSON('proxy.php', { 'url': vocabUrl }, function(resource) {
+        var vocab = resource['@graph'];
+        property = self.findElement(vocab, property);
+
+        if ('operations' in property) {
+          self.operationsModal.model.update(property.operations, target);
+        } else {
+          self.operationsModal.model.update(null, target);
+        }
+
+        self.operationsModal.widget.modal('show');
+      }).error(function() {
+        alert("Can't find documentation for property " + property);
+      });
     }
   };
 

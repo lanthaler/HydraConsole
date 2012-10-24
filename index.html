@@ -33,6 +33,13 @@
     #addressbar input {
       width: 675px;
     }
+    #operationsModal {
+      width: 700px;
+      margin-left: -350px;
+    }
+    #operationsModal-body {
+      min-height: 250px;
+    }
   </style>
 </head>
 <body>
@@ -111,56 +118,93 @@ above and click on &quot;Load&quot;
   </div>
 
   <div class="modal hide fade" id="operationsModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<script id="operationsModal-template">
     <form class="modal-form">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <% if (target) { %>
         <h3>Invoke an Operation</h3>
+      <% } else { %>
+        <h3>Documented Operations</h3>
+      <% } %>
       </div>
-      <div class="modal-body">
+      <div id="operationsModal-body" class="modal-body">
         <table class="table no-border">
+          <% if (target) { %>
           <tr>
             <td>Target IRI:</td>
-            <td><code>http://hydra.test/users/1</code></td>
+            <td><code><%= target %></code></td>
           </tr>
+          <% } %>
           <tr>
             <td>Operation:</td>
             <td>
               <div class="dropdown">
-                <span class="label label-info">PUT</span> <a class="dropdown-toggle" data-toggle="dropdown" data-trigger="hover" href="#"> Update this product <b class="caret"></b></a>
+                <% if ((null !== selected) && (selected < operations.length)) { %>
+                  <span class="label label-info"><%= operations[selected].method %></span>
+                  <a class="dropdown-toggle" data-toggle="dropdown" data-trigger="hover" href="#"><% if (operations[selected].label) { %><%= operations[selected].label %><% } else { %><span class="muted">no documentation available</span><% } %> <b class="caret"></b></a>
+                <% } else { %>
+                  <a class="dropdown-toggle" data-toggle="dropdown" data-trigger="hover" href="#">Select an operation <b class="caret"></b></a>
+                <% } %>
                 <ul class="dropdown-menu">
-                  <!-- <li><a href="#"><span class="label label-info">GET</span> Retrieve the resource</a></li> -->
-                  <li><a href="#"><span class="label">GET</span> <span class="muted">no documentation available</span></a></li>
-                  <!-- <li><a href="#"><span class="label label-info">POST</span> Create a new resource</a></li> -->
-                  <li><a href="#"><span class="label">POST</span> <span class="muted">no documentation available</span></a></li>
-                  <li><a href="#"><span class="label label-info">PUT</span> Replace the resource</a></li>
-                  <li><a href="#"><span class="label label-info">DELETE</span> Delete the resource</a></li>
+                <% _.each(operations, function(operation, index) { %>
+                  <li><a href="#" class="operation" data-index="<%= index %>"><span class="label<% if (true !== operation.default) print(' label-info'); %>"><%= operation.method %></span>
+                    <% if (operation.label) { %><%= operation.label %><% } else { %><span class="muted">no documentation available</span><% } %></a></li>
+                <% }); %>
                 </ul>
               </div>
             </td>
           </tr>
+        <% if (selected) { %>
           <tr>
             <td>Description:</td>
-            <td>Edits the product</td>
+            <td><% if (operations[selected].description) { %>
+              <%= operations[selected].description %></td>
+            <% } else { %>
+              <span class="muted">n/a</span>
+            <% } %></td>
           </tr>
           <tr>
             <td>Expects:</td>
-            <td><code>Product</code></td>
+            <td><% if (operations[selected].expects) { %>
+              <%= operations[selected].expects %></td>
+            <% } else { %>
+              <span class="muted">n/a</span>
+            <% } %></td>
           </tr>
           <tr>
             <td>Returns:</td>
-            <td><code>Product</code></td>
+            <td><% if (operations[selected].returns) { %>
+              <%= operations[selected].returns %></td>
+            <% } else { %>
+              <span class="muted">n/a</span>
+            <% } %></td>
+          </tr>
+          <tr>
+            <td>Status Codes:</td>
+            <td><% if (operations[selected].status_codes && (operations[selected].status_codes.length > 0)) { %>
+              <% _.each(operations[selected].status_codes, function(status_code) { %>
+                <code><%- status_code.code %></code> <%- status_code.description %>
+              <% }); %>
+            <% } else { %>
+              <span class="muted">n/a</span>
+            <% } %></td>
           </tr>
 <!--           <tr>
             <td></td>
             <td><textarea class="input-xlarge" rows="3"></textarea></td>
           </tr> -->
+          <% } %>
         </table>
       </div>
       <div class="modal-footer">
+      <% if (target) { %>
         <a href="#" class="btn btn-primary">Invoke</a>
+      <% } %>
         <a href="#" class="btn" data-dismiss="modal">Close</a>
       </div>
     </form>
+</script>
   </div>
 
   <script id="documentation-template" style="display:none">
@@ -190,7 +234,7 @@ above and click on &quot;Load&quot;
           </td>
           <td>
             <%= property.label %><%= property.description %><% if (property.operations.length > 0) { %><br />
-            <a class="btn btn-link btn-small dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-tags icon"></i> Operations</a>
+            <a class="btn btn-link btn-small operations" data-iri="<%- property['@id'] %>" href="#"><i class="icon-tags icon"></i> Operations</a>
             <% } %>
           </td>
         </tr>
