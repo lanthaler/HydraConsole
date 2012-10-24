@@ -116,6 +116,7 @@
     render: function() {
       this.$el.html(this.renderResponse(this.model.get('data'), '', false));
       $('.prop-key').tooltip({ 'placement': 'right' });
+      $('.literal').tooltip({ 'placement': 'right' });
       $('.context').popover( {
         'trigger': 'hover',
         'placement': 'right',
@@ -137,12 +138,14 @@
         result += ']';
         result += (last) ? '' : ',';
       } else if (_.isObject(data)) {
-        if ('__orig_value' in data) {  // it was a literal
-          result += '<span class="literal" title="';
-          result += _.escape(JSON.stringify(data.__value)) + '">';
+        if ('__orig_value' in data) {
+          result += '<span';
+          result += ' title="' + _.escape(JSON.stringify(data.__value)) + '"';
 
           if ('@id' in data.__value) {
-            result += '<a href="' + data.__value['@id'] + '">';
+            result += '><a href="' + data.__value['@id'] + '">';
+          } else {
+             result += ' class="literal">'
           }
           result += _.escape(JSON.stringify(data.__orig_value));
           if ('@id' in data.__value) {

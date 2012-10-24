@@ -40,6 +40,9 @@
     #operationsModal-body {
       min-height: 250px;
     }
+    #response .context, #response .prop-key, #response .literal {
+      cursor: help;
+    }
   </style>
 </head>
 <body>
@@ -218,7 +221,7 @@ above and click on &quot;Load&quot;
             <br /><small class="muted">readonly</small>
           </td>
           <td>
-            This entity&#039;s IRI
+            The entity&#039;s IRI
             <% if (docu.operations.length > 0) { %>
             <p><a class="btn btn-link btn-small operations" data-iri="<%- docu['@id'] %>" href="#"><i class="icon-tags icon"></i> Operations</a></p>
             <% } %>
