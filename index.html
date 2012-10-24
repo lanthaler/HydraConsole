@@ -43,6 +43,9 @@
     #response .context, #response .prop-key, #response .literal {
       cursor: help;
     }
+    tr.request td, tr.request th {
+      background-color: #f5f5f5;
+    }
   </style>
 </head>
 <body>
@@ -132,13 +135,16 @@ above and click on &quot;Load&quot;
       <% } %>
       </div>
       <div id="operationsModal-body" class="modal-body">
+        <% if (target) { %>
+        <form>
         <table class="table no-border">
-          <% if (target) { %>
           <tr>
             <td>Target IRI:</td>
             <td><code><%= target %></code></td>
           </tr>
-          <% } %>
+        <% } else { %>
+        <table class="table no-border">
+        <% } %>
           <tr>
             <td>Operation:</td>
             <td>
@@ -193,12 +199,26 @@ above and click on &quot;Load&quot;
               <span class="muted">n/a</span>
             <% } %></td>
           </tr>
-<!--           <tr>
-            <td></td>
-            <td><textarea class="input-xlarge" rows="3"></textarea></td>
-          </tr> -->
+          <% if (target && expectsDef) { %>
+          <tr class="request">
+            <th colspan="2">Request Data</th>
+          </tr>
+          <% _.each(expectsDef.properties, function(property) { %>
+          <% if (!property.readonly) { %>
+          <tr class="request">
+            <th><label for="<%- property.short_name %>"><%- property.short_name %></label></th>
+            <td>
+              <input type="text" id="<%- property.short_name %>" placeholder="<%- property.label %>" />
+            </td>
+          </tr>
           <% } %>
+          <% }); %>
+          <% } %>
+        <% } %>
         </table>
+        <% if (target) { %>
+        </form>
+        <% } %>
       </div>
       <div class="modal-footer">
       <% if (target) { %>

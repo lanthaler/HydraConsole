@@ -273,6 +273,7 @@
 
     initialize: function() {
       this.model.bind('change', this.render, this);
+      this.model.bind('change:selected', this.operationSelected, this);
 
       $('#operationsModal-template').remove();
     },
@@ -282,6 +283,25 @@
       "click .button.edit":   "openEditDialog",
       "click .button.delete": "destroy"
     },*/
+
+    operationSelected: function() {
+      var self = this;
+      var selected = self.model.get('selected');
+
+      self.model.set({ 'expectsDef' : null }, { silent: true });
+
+      if (null !== selected) {
+        var expects = self.model.get('operations')[selected].expects;
+
+        if (expects) {
+          // TODO Handle case when type is not in vocab
+          self.model.set(
+            { 'expectsDef' : self.options.documentation.getTypeDefinition(expects) },
+            { silent: true }
+          );
+        }
+      }
+    },
 
     render: function() {
       var self = this;
@@ -322,7 +342,8 @@
 
       this.operationsModal.model = new Hydra.Models.OperationsModal();
       this.operationsModal.view = new Hydra.Views.OperationsModal({
-        model: this.operationsModal.model
+        model: this.operationsModal.model,
+        documentation: this.documentation.model
       });
 
       return this;
@@ -481,5 +502,6 @@ $('#response').on("mouseleave", ".prop", function () {
 $(document).ready(function() {
   window.HydraClient.showDocumentation();
   //window.HydraClient.get('http://hydra.test/users/1');
+  window.HydraClient.get('http://hydra.test/');
   $('#url').focus();
 });
