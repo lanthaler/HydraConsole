@@ -159,7 +159,7 @@ above and click on &quot;Load&quot;
           <tr>
             <td>Description:</td>
             <td><% if (operations[selected].description) { %>
-              <%= operations[selected].description %></td>
+              <%- operations[selected].description %>
             <% } else { %>
               <span class="muted">n/a</span>
             <% } %></td>
@@ -167,7 +167,7 @@ above and click on &quot;Load&quot;
           <tr>
             <td>Expects:</td>
             <td><% if (operations[selected].expects) { %>
-              <%= operations[selected].expects %></td>
+              <code><%- operations[selected].expects %></code>
             <% } else { %>
               <span class="muted">n/a</span>
             <% } %></td>
@@ -175,7 +175,7 @@ above and click on &quot;Load&quot;
           <tr>
             <td>Returns:</td>
             <td><% if (operations[selected].returns) { %>
-              <%= operations[selected].returns %></td>
+              <code><%- operations[selected].returns %></code>
             <% } else { %>
               <span class="muted">n/a</span>
             <% } %></td>
