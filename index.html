@@ -199,20 +199,35 @@ above and click on &quot;Load&quot;
               <span class="muted">n/a</span>
             <% } %></td>
           </tr>
-          <% if (target && expectsDef) { %>
+          <% if (target && expectsDef || (('POST' == operations[selected].method) || ('PUT' == operations[selected].method))) { %>
           <tr class="request">
             <th colspan="2">Request Data</th>
           </tr>
+          <% if (expectsDef) { %>
           <% _.each(expectsDef.properties, function(property) { %>
           <% if (!property.readonly) { %>
           <tr class="request">
             <th><label for="<%- property.short_name %>"><%- property.short_name %></label></th>
             <td>
-              <input type="text" name="<%- property.short_name %>" placeholder="<%- property.label %>" />
+              <input type="text" name="<%- property.short_name %>" class="input-xlarge" placeholder="<%- property.label %>" />
             </td>
           </tr>
           <% } %>
           <% }); %>
+          <% } else { %>
+          <!--<tr class="request">
+            <th><label for="headers">Request headers</label></th>
+            <td>
+              <textarea rows="3" class="input-xlarge" name="headers" placeholder="Type in the request headers. They will be sent as-is">Content-Type: application/ld+json</textarea>
+            </td>
+          </tr>-->
+          <tr class="request">
+            <th><label for="body">Request body</label></th>
+            <td>
+              <textarea rows="10" class="input-xlarge" name="body" placeholder="Type in the request body. It will be sent as-is"></textarea>
+            </td>
+          </tr>
+          <% } %>
           <% } %>
         <% } %>
         </table>

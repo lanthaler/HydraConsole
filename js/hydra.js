@@ -317,7 +317,7 @@
         self.model.set({ 'selected': $(this).attr('data-index') });
       });
 
-      $('#operationsForm').on('submit', function() { self.onInvoke() });
+      $('#operationsForm').on('submit', function() { return self.onInvoke() });
 
       return this;
     },
@@ -347,12 +347,16 @@
     },
 
     getRequestBody: function(expects) {
-      if (!expects) {
+      if (!expects && !$('#operationsForm textarea')) {
         return null;
       }
 
       var formData = $('#operationsForm').serializeArray();
       var result = {};
+
+      if (!expects) {
+        return formData[0].value;
+      }
 
       result['@context'] = {};
 
@@ -367,7 +371,6 @@
       });
 
       return JSON.stringify(result);
-
     }
 
   });
