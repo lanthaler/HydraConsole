@@ -273,7 +273,7 @@
 
   Hydra.Views.OperationsModal = Backbone.View.extend({
     el: $("#operationsModal"),
-    body: $("#operationsModal"),
+    dialog: $("#operationsModal"),
     template: _.template($('#operationsModal-template').html()),
 
     initialize: function() {
@@ -311,13 +311,63 @@
     render: function() {
       var self = this;
 
-      self.body.html(self.template(self.model.toJSON()));
+      self.dialog.html(self.template(self.model.toJSON()));
 
-      self.body.on("click", ".operation", function () {
+      self.dialog.on("click", ".operation", function () {
         self.model.set({ 'selected': $(this).attr('data-index') });
       });
 
+      $('#operationsForm').on('submit', function() { self.onInvoke() });
+
       return this;
+    },
+
+    onInvoke: function() {
+      var self = this;
+      var operation = self.model.get('operations')[self.model.get('selected')];
+
+      if (!operation) {
+        alert("You must select an operation.");
+        return false;
+      }
+
+      if ('GET' === operation.method) {
+        window.HydraClient.get(self.model.get('target'));
+      } else {
+        window.HydraClient.request(
+          operation.method,
+          self.model.get('target'),
+          self.getRequestBody(self.model.get('expectsDef'))
+        );
+      }
+
+      self.dialog.modal('hide');
+
+      return false;
+    },
+
+    getRequestBody: function(expects) {
+      if (!expects) {
+        return null;
+      }
+
+      var formData = $('#operationsForm').serializeArray();
+      var result = {};
+
+      result['@context'] = {};
+
+      _.each(expects['properties'], function(property) {
+        result['@context'][property['short_name']] = property['@id'];
+      });
+
+      result['@type'] = expects['@id'];
+
+      _.each(formData, function(element) {
+        result[element.name] = element.value;
+      });
+
+      return JSON.stringify(result);
+
     }
 
   });
@@ -331,8 +381,12 @@
 
     initialize: function() {
       $.ajaxSetup({
-       headers: { 'Accept': 'application/ld+json, application/json;q=0.1' }/*,
-       cache: false*/
+        headers: {
+          'Accept': 'application/ld+json, application/json;q=0.1'
+        },
+        'contentType': 'application/ld+json',
+        'dataType': 'json',
+        // cache: false
       });
 
       this.documentation.model = new Hydra.Models.Documentation();
@@ -355,27 +409,50 @@
     },
 
     get: function(url) {
+      this.request('GET', url);
+    },
+
+    request: function(method, url, data) {
       var self = this;
 
-      url = url || self.addressbar.getUrl();
+      data = data || null
 
       $('#load').removeClass('btn-inverse');
 
-      var jqxhr = $.getJSON('proxy.php', { 'debug': true, 'url': url }, function(resource) {
-        //self.vent.trigger('response', { resource: resource });
+      var jqxhr = self.invokeRequest(method, url, data)
+        .done(function(resource) {
+          //self.vent.trigger('response', { resource: resource });
 
-        self.response.model.set({ data: resource });
-        self.addressbar.setUrl(url);
+          self.response.model.set({ data: resource });
+          self.addressbar.setUrl(url);
 
-        if (_.isObject(resource) && ('@type' in resource)) {
-          self.showDocumentation(resource['@type'].__value.__value['@id']);
-        }
-      }).error(function() {
-        alert('Request failed');
-        self.vent.trigger('fail-response', { jqxhr: jqxhr });
-      }).complete(function() {
-        $('#load').addClass('btn-inverse');
-      });
+          if (_.isObject(resource) && ('@type' in resource)) {
+            self.showDocumentation(resource['@type'].__value.__value['@id']);
+          }
+        })
+        .fail(function() {
+          alert('Request failed');
+          self.vent.trigger('fail-response', { jqxhr: jqxhr });
+        })
+        .always(function() {
+          $('#load').addClass('btn-inverse');
+        });
+    },
+
+    invokeRequest: function(method, url, data, headers) {
+      var self = this;
+
+      var settings = {
+        'type': method || 'GET',
+        'headers': headers || null,
+        'processData': false,
+        'data': data || null/*,
+        'callback': callback || null*/
+      };
+
+      var jqxhr = $.ajax('proxy.php?debug=true&url=' + encodeURI(url), settings);
+
+      return jqxhr;
     },
 
     showDocumentation: function(url) {
@@ -460,7 +537,7 @@
 // ---- Activate tooltips and popovers
 
 $('#addressbar').on("submit", function () {
-    window.HydraClient.get();
+    window.HydraClient.get($('#url').val());
     return false;
   })
 ;

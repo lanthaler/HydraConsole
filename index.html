@@ -125,7 +125,7 @@ above and click on &quot;Load&quot;
 
   <div class="modal hide fade" id="operationsModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 <script id="operationsModal-template">
-    <form class="modal-form">
+    <form id="operationsForm" class="modal-form">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
       <% if (target) { %>
@@ -208,7 +208,7 @@ above and click on &quot;Load&quot;
           <tr class="request">
             <th><label for="<%- property.short_name %>"><%- property.short_name %></label></th>
             <td>
-              <input type="text" id="<%- property.short_name %>" placeholder="<%- property.label %>" />
+              <input type="text" name="<%- property.short_name %>" placeholder="<%- property.label %>" />
             </td>
           </tr>
           <% } %>
@@ -217,12 +217,11 @@ above and click on &quot;Load&quot;
         <% } %>
         </table>
         <% if (target) { %>
-        </form>
         <% } %>
       </div>
       <div class="modal-footer">
       <% if (target) { %>
-        <a href="#" class="btn btn-primary">Invoke</a>
+        <button class="btn btn-primary">Invoke</button>
       <% } %>
         <a href="#" class="btn" data-dismiss="modal">Close</a>
       </div>
