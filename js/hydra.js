@@ -110,6 +110,11 @@
       var $target = $(e.target);
       var uri = $target.attr('href') || $target.parent().attr('href');
 
+      if (e.shiftKey) {
+        window.HydraClient.get(uri);
+        return;
+      }
+
       var element = $target;
       var property = null;
       do {
