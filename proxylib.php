@@ -18,7 +18,7 @@
  *          $proxy = new AjaxProxy('http://subdomain.example.com');
  *          $proxy->execute();
  *      2. From our javascript, make requests to
- *          http://example.com/proxy.php?route=/other/resource
+ *          http://example.com/proxy.php?url=/other/resource
  * The heart of the functionality of this script is self-contained, reusable
  *  proxy class. This class could very easily be incorporated into an MVC
  *  framework or set of libraries.
@@ -121,11 +121,14 @@ class AjaxProxy
     protected $_rawHeaders        = NULL;
 
     /**
-     * Will hold the route for the proxy request submitted by the client in
-     *  the query string's 'route' parameter
+     * Will hold the url for the proxy request submitted by the client in
+     *  the query string's 'url' parameter
      * @var string
      */
-    protected $_route             = NULL;
+    protected $_url             = NULL;
+
+
+    protected $_responseModifier = NULL;
 
     /**
      * Initializes the Proxy object
@@ -143,7 +146,7 @@ class AjaxProxy
      *  larger application with it's own error and exception handling, you
      *  should set this to false, or it will override your settings.
      */
-    public function  __construct(   $forward_host,
+    public function  __construct(   $forward_host      = NULL,
                                     $allowed_hostnames = NULL,
                                     $handle_errors     = TRUE)
     {
@@ -159,6 +162,11 @@ class AjaxProxy
 
         if($handle_errors)
             $this->_setErrorHandlers();
+    }
+
+    public function setResponseModifier($responseModifier)
+    {
+        $this->_responseModifier = $responseModifier;
     }
 
     /**
@@ -210,7 +218,7 @@ class AjaxProxy
         $this->_loadRequestUserAgent();
         $this->_loadRawHeaders();
         $this->_loadContentType();
-        $this->_loadRoute();
+        $this->_loadUrl();
 
         if($this->_requestMethod === self::REQUEST_METHOD_POST
             || $this->_requestMethod === self::REQUEST_METHOD_PUT)
@@ -220,16 +228,18 @@ class AjaxProxy
     }
 
     /**
-     * Get the path to where the request will be made. This will be prepended
-     *  by PROXY_HOST
-     * @throws Exception When there is no 'route' parameter
+     * Get the url to where the request will be made.
+     *
+     * @throws Exception When there is no 'url' parameter
      */
-    protected function _loadRoute()
+    protected function _loadUrl()
     {
-        if(!key_exists('route', $_GET))
-            throw new Exception("You must supply a 'route' parameter in the request");
+        if(!key_exists('url', $_GET))
+            throw new Exception("You must supply a 'url' parameter in the request");
 
-        $this->_route = $_GET['route'];
+        $this->_url = ($this->_forwardHost)
+            ? $this->_forwardHost . $_GET['url']
+            : $_GET['url'];
     }
 
     /**
@@ -351,13 +361,11 @@ class AjaxProxy
      */
     protected function _makeRequest()
     {
-        $url = $this->_forwardHost . $this->_route;
-
         # Check for cURL. If it isn't loaded, fall back to fopen()
         if(function_exists('curl_init'))
-            $this->_rawResponse = $this->_makeCurlRequest($url);
+            $this->_rawResponse = $this->_makeCurlRequest($this->_url);
         else
-            $this->_rawResponse = $this->_makeFOpenRequest($url);
+            $this->_rawResponse = $this->_makeFOpenRequest($this->_url);
     }
 
     /**
@@ -385,7 +393,13 @@ class AjaxProxy
         curl_setopt($curl_handle, CURLOPT_COOKIE, $this->_buildProxyRequestCookieString());
         curl_setopt($curl_handle, CURLOPT_HTTPHEADER, $this->_generateProxyRequestHeaders());
 
-        return curl_exec($curl_handle);
+        $response = curl_exec($curl_handle);
+
+        if (false === $response) {
+            var_dump(curl_error($curl_handle));
+        } else {
+            return $response;
+        }
     }
 
     /**
@@ -497,12 +511,14 @@ class AjaxProxy
         # Let's check to see if we recieved a header but no body
         if($break === FALSE)
         {
-            $look_for = 'HTTP/';
-
-            if(strpos($this->_rawResponse, $look_for) !== FALSE)
+            if(strpos($this->_rawResponse, 'HTTP/') !== FALSE)
+            {
                 $break = strlen($this->_rawResponse);
+            }
             else
+            {
                 throw new Exception("A valid response was not received from the host");
+            }
         }
 
         $header = substr($this->_rawResponse, 0, $break);
@@ -615,6 +631,11 @@ class AjaxProxy
      */
     protected function _output($data)
     {
+        if($this->_responseModifier)
+        {
+          $data = call_user_func($this->_responseModifier, $data);
+        }
+
         echo $data;
     }
 
@@ -667,9 +688,3 @@ class AjaxProxy
     }
 }
 
-/**
- * Here's the actual script part. Comment it out or remove it if you simply want
- *  the class' functionality
- */
-$proxy = new AjaxProxy('http://login.example.com/');
-$proxy->execute();
