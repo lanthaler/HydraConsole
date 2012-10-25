@@ -1,5 +1,6 @@
 <?php
 
+require('proxylib.php');
 require('../../../JsonLD/Test/bootstrap.php');
 
 ini_set('html_errors', 0);
@@ -13,26 +14,35 @@ $options->base = $_GET['url'];
 
 $debug = isset($_GET['debug']) ? (boolean)$_GET['debug'] : false;
 
-try
+$debugExpansion = function($document)
 {
-  $result = null;
-  if ($debug) {
-    $result = JsonLD::toString(JsonLD::expand($_GET['url'], $options, $debug));
-  } else {
-    $result = JsonLD::toString(JsonLD::parse($_GET['url']));
-  }
-
-  header('Content-Type: application/json');  // TODO Change media type - kept as json to be usable in Firebug ATM
-  print $result;
-}
-catch (Exception $e)
-{
-  $exceptionName = get_class($e);
-  if (false !== ($pos = strrpos(get_class($e), '\\')))
+  global $options;
+  try
   {
-    $exceptionName = substr($exceptionName, $pos + 1);
-  }
+    $result = JsonLD::toString(JsonLD::expand($document, $options, true));
 
-  header('HTTP/1.1 400 ' . $exceptionName); //Bad Request');
-  print htmlspecialchars($e->getMessage());
+    return $result;
+  }
+  catch (Exception $e)
+  {
+    $exceptionName = get_class($e);
+    if (false !== ($pos = strrpos(get_class($e), '\\')))
+    {
+      $exceptionName = substr($exceptionName, $pos + 1);
+    }
+
+    header('HTTP/1.1 400 ' . $exceptionName); //Bad Request');
+    print htmlspecialchars($e->getMessage());
+
+    die();
+  }
+};
+
+
+$proxy = new AjaxProxy();
+
+if ($debug) {
+  $proxy->setResponseModifier($debugExpansion);
 }
+
+$proxy->execute();
