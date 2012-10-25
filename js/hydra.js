@@ -367,7 +367,7 @@
       result['@type'] = expects['@id'];
 
       _.each(formData, function(element) {
-        result[element.name] = element.value;
+        result[element.name] = ('' == element.value) ? null : element.value;
       });
 
       return JSON.stringify(result);
