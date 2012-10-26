@@ -423,11 +423,16 @@
       $('#load').removeClass('btn-inverse');
 
       var jqxhr = self.invokeRequest(method, url, data)
-        .done(function(resource) {
+        .done(function(resource, textStatus, jqXHR) {
           //self.vent.trigger('response', { resource: resource });
 
           self.response.model.set({ data: resource });
-          self.addressbar.setUrl(url);
+
+          if (jqXHR.getResponseHeader('Content-Location')) {
+            self.addressbar.setUrl(jqXHR.getResponseHeader('Content-Location'));
+          } else {
+            self.addressbar.setUrl(url);
+          }
 
           if (_.isObject(resource) && ('@type' in resource)) {
             self.showDocumentation(resource['@type'].__value.__value['@id']);
