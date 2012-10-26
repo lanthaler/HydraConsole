@@ -347,7 +347,7 @@
     },
 
     getRequestBody: function(expects) {
-      if (!expects && !$('#operationsForm textarea')) {
+      if (!expects && (0 === $('#operationsForm textarea').length)) {
         return null;
       }
 
