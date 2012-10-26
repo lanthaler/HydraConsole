@@ -45,11 +45,6 @@
  */
 class AjaxProxy
 {
-    const REQUEST_METHOD_POST    = 1;
-    const REQUEST_METHOD_GET     = 2;
-    const REQUEST_METHOD_PUT     = 3;
-    const REQUEST_METHOD_DELETE  = 4;
-
     /**
      * Will hold the hostname or IP address of the machin allowed to access this
      *  proxy
@@ -184,30 +179,6 @@ class AjaxProxy
     }
 
     /**
-     * Return the string form of the request method constant
-     * @param int $type A request method type constant, like
-     *  self::REQUEST_METHOD_POST
-     * @return string The string form of the passed constant, like POST
-     */
-    protected static function _getStringFromRequestType($type)
-    {
-        $name = '';
-
-        if($type === self::REQUEST_METHOD_POST)
-            $name = "POST";
-        elseif($type === self::REQUEST_METHOD_GET)
-            $name = "GET";
-        elseif($type === self::REQUEST_METHOD_PUT)
-            $name = "PUT";
-        elseif($type === self::REQUEST_METHOD_DELETE)
-            $name = "DELETE";
-        else
-            throw new Exception("Unknown request method constant ($type) passed as a parameter");
-
-        return $name;
-    }
-
-    /**
      * Gather any information we need about the request and
      *  store them in the class properties
      */
@@ -220,8 +191,8 @@ class AjaxProxy
         $this->_loadContentType();
         $this->_loadUrl();
 
-        if($this->_requestMethod === self::REQUEST_METHOD_POST
-            || $this->_requestMethod === self::REQUEST_METHOD_PUT)
+        if($this->_requestMethod === 'POST'
+            || $this->_requestMethod === 'PUT')
         {
             $this->_loadRequestBody();
         }
@@ -266,21 +237,17 @@ class AjaxProxy
     {
         if($this->_requestMethod !== NULL) return;
 
-        if(! key_exists('REQUEST_METHOD', $_SERVER))
+        if(!key_exists('REQUEST_METHOD', $_SERVER)) {
             throw new Exception("Request method unknown");
+        }
 
-        $method = strtolower($_SERVER['REQUEST_METHOD']);
+        $method = strtoupper($_SERVER['REQUEST_METHOD']);
 
-        if($method == "get")
-            $this->_requestMethod = self::REQUEST_METHOD_GET;
-        elseif($method == "post")
-            $this->_requestMethod = self::REQUEST_METHOD_POST;
-        elseif($method == "put")
-            $this->_requestMethod = self::REQUEST_METHOD_PUT;
-        elseif($method == "delete")
-            $this->_requestMethod = self::REQUEST_METHOD_DELETE;
-        else
+        if (in_array($method, array('GET', 'POST', 'PUT', 'DELETE', 'PATCH'))) {
+            $this->_requestMethod = $method;
+        } else {
             throw new Exception("Request method ($method) invalid");
+        }
     }
 
     /**
@@ -377,13 +344,10 @@ class AjaxProxy
     protected function _makeCurlRequest($url)
     {
         $curl_handle = curl_init($url);
-        /**
-         * Check to see if this is a POST request
-         * @todo What should we do for PUTs? Others?
-         */
-        if($this->_requestMethod === self::REQUEST_METHOD_POST)
+
+        curl_setopt($curl_handle, CURLOPT_CUSTOMREQUEST, $this->_requestMethod);
+        if($this->_requestBody)
         {
-            curl_setopt($curl_handle, CURLOPT_POST, true);
             curl_setopt($curl_handle, CURLOPT_POSTFIELDS, $this->_requestBody);
         }
 
@@ -477,10 +441,10 @@ class AjaxProxy
         );
 
         # Figure out what kind of request we're making, and what to fill it with
-        $stream_context['method'] = $this->_getStringFromRequestType($this->_requestMethod);
+        $stream_context['method'] = $this->_requestMethod;
 
-        if($this->_requestMethod === self::REQUEST_METHOD_POST ||
-           $this->_requestMethod === self::REQUEST_METHOD_PUT)
+        if($this->_requestMethod === 'POST' ||
+           $this->_requestMethod === 'PUT')
         {
             $stream_context['content'] = $this->_requestBody;
         }
