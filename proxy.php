@@ -16,6 +16,10 @@ $debug = isset($_GET['debug']) ? (boolean)$_GET['debug'] : false;
 
 $debugExpansion = function($document)
 {
+  if (0 === strlen(trim($document))) {
+    return $document;
+  }
+
   global $options;
   try
   {
