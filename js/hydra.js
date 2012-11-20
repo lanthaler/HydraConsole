@@ -272,10 +272,10 @@
         this.title.html('');
         this.details.html('<p>Loading the documentation failed.</p>');
       } else {
-        this.title.html(_.escape(type.short_name));
-        this.details.html(this.template({
-          'docu': this.model.getTypeDefinition(this.model.get('type'))
-        }));
+        var definition = this.model.getTypeDefinition(this.model.get('type'));
+
+        this.title.html(_.escape(definition.short_name));
+        this.details.html(this.template({ 'docu': definition }));
       }
       return this;
     }
