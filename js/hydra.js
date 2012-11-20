@@ -117,6 +117,13 @@
 
       var element = $target;
       var property = null;
+      var types = null;
+
+      // TODO Add support for multiple types
+      if ((null === types) && (element.parent().parent().siblings('.prop[data-iri="@type"]').length > 0)) {
+        types = JSON.parse(element.parent().parent().siblings('.prop[data-iri="@type"]').children('span')[1].title)['@id'];
+      }
+
       do {
         if (element.hasClass('prop') && element.attr('data-iri') && '@id' !== element.attr('data-iri')) {
           property = element.attr('data-iri');
@@ -126,20 +133,15 @@
         element = element.parent();
       } while ('response' !== element.attr('id'));
 
-      if (null == property) {
-        alert('Failed to find property associated with this IRI');
-        return;
-      }
-
       // If the property is the value of a keyword GET it (or show the @type documentation), otherwise show dialog
-      if ('@' === property[0]) {
+      if ((null !== property) && ('@' === property[0])) {
         if ('@type' === property) {
           window.HydraClient.showDocumentation(uri);
         } else {
           window.HydraClient.get(uri);
         }
       } else {
-        window.HydraClient.showOperationsModal(property, uri);
+        window.HydraClient.showOperationsModal(_.union(property, types), uri);
       }
     },
 
@@ -253,7 +255,7 @@
       this.model.bind('change:type', this.render, this);
 
       this.details.on("click", ".operations", function () {
-        window.HydraClient.showOperationsModal($(this).attr('data-iri'), null);
+        window.HydraClient.showOperationsModal([ $(this).attr('data-iri') ], null);
       });
     },
 
@@ -517,48 +519,60 @@
       });
     },
 
-    showOperationsModal: function(property, target) {
+    showOperationsModal: function(elements, target) {
       var self = this;
 
       // Operations can
       //    - be associated with the type
       //    - or the property
       //    - or be expressed in-line
+      //
+      elements = _.filter(elements, function(element) {
+        return ((undefined !== element) && (null !== element));
+      })
 
-      if ((undefined === property) || (null === property)) {
+      if (0 === elements.length) {
         return;
       }
 
-      var vocabUrl = property.split('#', 2)[0];
-
-      if (vocabUrl === self.documentation.model.get('vocabUrl')) {
-        property = self.documentation.model.getElementDefinition(property);
-
-        if ('operations' in property) {
-          self.operationsModal.model.update(property.operations, target);
-        } else {
-          self.operationsModal.model.update(null, target);
-        }
+      var operations = [];
+      var showModal = _.after(elements.length, function() {
+        self.operationsModal.model.update(operations, target);
 
         self.operationsModal.widget.modal('show');
+      });
+      //self.operationsModal.model.update(elements.operations, target);
 
-        return;
-      }
+      _.each(elements, function(element) {
+        var vocabUrl = element.split('#', 2)[0];
 
-      var jqxhr = $.getJSON('proxy.php', { 'url': vocabUrl }, function(resource) {
-        // TODO Merge the vocabulary into the documentation model
-        var vocab = resource['@graph'];
-        property = self.documentation.model.getElementDefinition(property, vocab);
+        if (vocabUrl === self.documentation.model.get('vocabUrl')) {
+          element = self.documentation.model.getElementDefinition(element);
 
-        if ('operations' in property) {
-          self.operationsModal.model.update(property.operations, target);
+          if ('operations' in element) {
+            operations = _.union(operations, element.operations);
+          }
+
+          showModal();
+
+          //self.operationsModal.widget.modal('show');
+
         } else {
-          self.operationsModal.model.update(null, target);
-        }
+          var jqxhr = $.getJSON('proxy.php', { 'url': vocabUrl }, function(resource) {
+            // TODO Merge the vocabulary into the documentation model
+            var vocab = resource['@graph'];
+            element = self.documentation.model.getElementDefinition(element, vocab);
 
-        self.operationsModal.widget.modal('show');
-      }).error(function() {
-        alert("Can't find documentation for property " + property);
+            if ('operations' in element) {
+              operations = _.union(operations, element.operations);
+            }
+          }).fail(function() {
+            alert("Can't find documentation for property " + elements);
+          }).always(function() {
+            //self.operationsModal.widget.modal('show');
+            showModal();
+          });
+        }
       });
     }
   };
