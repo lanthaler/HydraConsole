@@ -144,14 +144,26 @@
     },
 
     render: function() {
-      this.$el.html(this.renderResponse(this.model.get('data'), '', false));
-      $('.prop-key').tooltip({ 'placement': 'right' });
-      $('.literal').tooltip({ 'placement': 'right' });
-      $('.context').popover( {
-        'trigger': 'hover',
-        'placement': 'right',
-        'title': 'Active context'
-      });
+      if (null !== this.model.get('data')) {
+        this.$el.html( this.renderResponse(this.model.get('data'), '', false));
+        $('.prop-key').tooltip({ 'placement': 'right' });
+        $('.literal').tooltip({ 'placement': 'right' });
+        $('.context').popover( {
+          'trigger': 'hover',
+          'placement': 'right',
+          'title': 'Active context'
+        });
+      } else {
+        if (this.model.get('headers')) {
+          this.$el.html(
+            '<span class="muted">' +
+            _.escape(this.model.get('headers')).replace("\n", '<br>') +
+            '</span><br>'
+          );
+        } else {
+          this.$el.html('<span class="muted">empty</span>');
+        }
+      }
       return this;
     },
 
@@ -426,7 +438,17 @@
         .done(function(resource, textStatus, jqXHR) {
           //self.vent.trigger('response', { resource: resource });
 
-          self.response.model.set({ data: resource });
+          if (resource.trim().length > 0) {
+            self.response.model.set({
+              data: JSON.parse(resource),
+              headers: 'HTTP/1.1 ' + jqXHR.status + ' ' + jqXHR.statusText + "\n" + jqXHR.getAllResponseHeaders()
+            });
+          } else {
+            self.response.model.set({
+              data: null,
+              headers: 'HTTP/1.1 ' + jqXHR.status + ' ' + jqXHR.statusText + "\n" + jqXHR.getAllResponseHeaders()
+            });
+          }
 
           if (jqXHR.getResponseHeader('Content-Location')) {
             self.addressbar.setUrl(jqXHR.getResponseHeader('Content-Location'));
@@ -438,9 +460,13 @@
             self.showDocumentation(resource['@type'].__value.__value['@id']);
           }
         })
-        .fail(function() {
+        .fail(function(jqXHR) {
+          self.response.model.set({
+            data: null,
+            headers: 'HTTP/1.1 ' + jqXHR.status + ' ' + jqXHR.statusText + "\n" + jqXHR.getAllResponseHeaders()
+          });
+
           alert('Request failed');
-          self.vent.trigger('fail-response', { jqxhr: jqxhr });
         })
         .always(function() {
           $('#load').addClass('btn-inverse');
@@ -454,8 +480,8 @@
         'type': method || 'GET',
         'headers': headers || null,
         'processData': false,
-        'data': data || null/*,
-        'callback': callback || null*/
+        'data': data || null,
+        'dataType': 'text'
       };
 
       var jqxhr = $.ajax('proxy.php?debug=true&url=' + encodeURI(url), settings);
@@ -592,6 +618,6 @@ $('#response').on("mouseleave", ".prop", function () {
 $(document).ready(function() {
   window.HydraClient.showDocumentation();
   //window.HydraClient.get('http://hydra.test/users/1');
-  window.HydraClient.get('http://hydra.test/');
+  window.HydraClient.get('http://hydra.test/app_dev.php/');
   $('#url').focus();
 });
