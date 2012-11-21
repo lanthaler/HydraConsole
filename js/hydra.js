@@ -25,6 +25,13 @@
         return entry['domain'] === type['@id'];
       });
 
+      for (var i = type.properties.length - 1; i >= 0; i--) {
+        var rangeDef = this.getElementDefinition(type.properties[i].range);
+        if (rangeDef) {
+          type.properties[i]['rangeLabel'] = rangeDef.label;
+        }
+      }
+
       return type;
     },
 
@@ -52,6 +59,24 @@
 
   Hydra.Models.OperationsModal = Backbone.Model.extend({
     update: function(operations, target) {
+
+      for (var i = operations.length - 1; i >= 0; i--) {
+        var def;
+        if (operations[i].expects) {
+          def = window.HydraClient.getElementDefinition(operations[i].expects);
+          if (def) {
+            operations[i]['expectsLabel'] = def.label;
+          }
+        }
+
+        if (operations[i].returns) {
+          def = window.HydraClient.getElementDefinition(operations[i].returns);
+          if (def) {
+            operations[i]['returnsLabel'] = def.label;
+          }
+        }
+      }
+
       if (target) {
         operations = _.union(operations, [
           { "method": "GET", "default": true },
@@ -76,13 +101,15 @@
 
       var length = operations.length;
       var method = operations[length - 1].method;
-      for (var i = length -2; i >= 0; i--) {
+      for (var i = length - 2; i >= 0; i--) {
         if ((true === operations[i].default) && (method === operations[i].method)) {
           operations.splice(i, 1);
         } else {
           method = operations[i].method;
         }
       }
+
+
 
       this.set({ 'operations': operations, 'target': target, 'selected': null ,});
     }
@@ -556,6 +583,10 @@
       }).error(function() {
         self.documentation.model.set({ 'type' : false, 'vocab': null, 'vocabUrl': null });
       });
+    },
+
+    getElementDefinition: function(url, vocab) {
+      return this.documentation.model.getElementDefinition(url, vocab);
     },
 
     showOperationsModal: function(elements, target) {
