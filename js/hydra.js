@@ -37,6 +37,16 @@
 
       return element;
     },
+
+    getTypes: function(vocab) {
+      var vocab = vocab || this.get('vocab');
+
+      var types = _.filter(vocab, function(entry) {
+        return ('rdfs:Class' === entry['@type']);
+      });
+
+      return types;
+    }
   });
 
 
@@ -252,15 +262,22 @@
   Hydra.Views.Documentation = Backbone.View.extend({
     el: $("#documentation"),
     title: $("#documentation-title"),
+    typesMenu: $("#documentation ul.dropdown-menu"),
     details: $("#documentation-details"),
     template: _.template($('#documentation-template').html()),
 
     initialize: function() {
       this.model.bind('change:type', this.render, this);
+      this.model.bind('change:vocab', this.updateAvailableTypes, this);
 
       this.details.on("click", ".operations", function () {
         window.HydraClient.showOperationsModal([ $(this).attr('data-iri') ], null);
       });
+
+      this.typesMenu.on("click", "a", function(e) {
+        e.preventDefault();
+        window.HydraClient.showDocumentation(e.target.href);
+      })
     },
 
     /*events: {
@@ -280,10 +297,24 @@
       } else {
         var definition = this.model.getTypeDefinition(this.model.get('type'));
 
-        this.title.html(_.escape(definition.short_name));
+        this.title.attr('href', definition['@id']);
+        this.title.html('<h4>' + _.escape(definition.short_name) + ' <b class="caret"></b></h4>');
         this.details.html(this.template({ 'docu': definition }));
       }
       return this;
+    },
+
+    updateAvailableTypes: function() {
+      var types = this.model.getTypes();
+      var menu = '';
+
+      types = _.sortBy(types, 'short_name');
+
+      _.each(types, function(type) {
+        menu += '<li><a href="' + type['@id'] + '">' + _.escape(type.short_name) + '</a></li>';
+      });
+
+      this.typesMenu.html(menu);
     }
 
   });
