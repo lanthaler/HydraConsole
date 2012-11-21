@@ -173,7 +173,7 @@
         if (this.model.get('headers')) {
           this.$el.html(
             '<span class="muted">' +
-            _.escape(this.model.get('headers')).replace("\n", '<br>') +
+            _.escape(this.model.get('headers')).replace(/\n/g, '<br>') +
             '</span><br>'
           );
         } else {
@@ -229,7 +229,7 @@
           if ('@context' === key) {
             //result += '&quot;@context&quot;: ' + _.escape(JSON.stringify(value)) + '<br>';
             result += '&quot;@context&quot;: <span class="context" data-content="<pre>';
-            result += _.escape(JSON.stringify(value.__activectx, null, 2)).replace("\n", '<br>');
+            result += _.escape(JSON.stringify(value.__activectx, null, 2)).replace(/\n/g, '<br>');
             result += '</pre>">';
             result += _.escape(JSON.stringify(value.__value, null, 2)).replace(/\n/g, '<br>  ' + indent);
             result += '</span>';
@@ -298,7 +298,7 @@
         var definition = this.model.getTypeDefinition(this.model.get('type'));
 
         this.title.attr('href', definition['@id']);
-        this.title.html('<h4>' + _.escape(definition.short_name) + ' <b class="caret"></b></h4>');
+        this.title.html('<h4>' + _.escape(definition.label) + ' <b class="caret"></b></h4>');
         this.details.html(this.template({ 'docu': definition }));
       }
       return this;
@@ -308,10 +308,10 @@
       var types = this.model.getTypes();
       var menu = '';
 
-      types = _.sortBy(types, 'short_name');
+      types = _.sortBy(types, 'label');
 
       _.each(types, function(type) {
-        menu += '<li><a href="' + type['@id'] + '">' + _.escape(type.short_name) + '</a></li>';
+        menu += '<li><a href="' + type['@id'] + '">' + _.escape(type.label) + '</a></li>';
       });
 
       this.typesMenu.html(menu);
@@ -410,7 +410,7 @@
       result['@context'] = {};
 
       _.each(expects['properties'], function(property) {
-        result['@context'][property['short_name']] = property['@id'];
+        result['@context'][property['label']] = property['@id'];
       });
 
       result['@type'] = expects['@id'];

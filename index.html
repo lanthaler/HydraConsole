@@ -198,9 +198,9 @@ above and click on &quot;Load&quot;
           <% _.each(expectsDef.properties, function(property) { %>
           <% if (!property.readonly) { %>
           <tr class="request">
-            <th><label for="<%- property.short_name %>"><%- property.short_name %></label></th>
+            <th><label for="<%- property.label %>"><%- property.label %></label></th>
             <td>
-              <input type="text" name="<%- property.short_name %>" class="input-xlarge" placeholder="<%- property.label %>" />
+              <input type="text" name="<%- property.label %>" class="input-xlarge" placeholder="<%- property.description %>" />
             </td>
           </tr>
           <% } %>
@@ -236,7 +236,7 @@ above and click on &quot;Load&quot;
   </div>
 
   <script id="documentation-template" style="display:none">
-    <p><%= docu.description %></p>
+    <p><%= docu.description.replace(/\n/g, '<br>') %></p>
     <table class="table table-hover">
       <tbody>
         <tr>
@@ -254,14 +254,14 @@ above and click on &quot;Load&quot;
         </tr>
         <% _.each(docu.properties, function(property) { %>
         <tr id="<%= property['@id'] %>">
-          <th><%= property.short_name %></th>
+          <th><%= property.label %></th>
           <td>
             <code><% if (property.range) { print(_.escape(property.range)); } else { print('<span class="muted">not specified</span>'); }; %></code>
             <% if (property.readonly) { %><br /><small class="muted">readonly</small><% } %>
             <% if (property.writeonly) { %><br /><small class="muted">writeonly</small><% } %>
           </td>
           <td>
-            <%= property.label %><%= property.description %><% if (property.operations.length > 0) { %><br />
+            <%= property.description.replace(/\n/g, '<br>') %><% if (property.operations.length > 0) { %><br />
             <a class="btn btn-link btn-small operations" data-iri="<%- property['@id'] %>" href="#"><i class="icon-tags icon"></i> Operations</a>
             <% } %>
           </td>
