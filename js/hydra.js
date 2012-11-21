@@ -443,12 +443,12 @@
           if (resource.trim().length > 0) {
             self.response.model.set({
               data: JSON.parse(resource),
-              headers: 'HTTP/1.1 ' + jqXHR.status + ' ' + jqXHR.statusText + "\n" + jqXHR.getAllResponseHeaders()
+              headers: self.getHeaders(jqXHR)
             });
           } else {
             self.response.model.set({
               data: null,
-              headers: 'HTTP/1.1 ' + jqXHR.status + ' ' + jqXHR.statusText + "\n" + jqXHR.getAllResponseHeaders()
+              headers: self.getHeaders(jqXHR)
             });
           }
 
@@ -465,7 +465,7 @@
         .fail(function(jqXHR) {
           self.response.model.set({
             data: null,
-            headers: 'HTTP/1.1 ' + jqXHR.status + ' ' + jqXHR.statusText + "\n" + jqXHR.getAllResponseHeaders()
+            headers: self.getHeaders(jqXHR)
           });
 
           alert('Request failed');
@@ -473,6 +473,10 @@
         .always(function() {
           $('#load').addClass('btn-inverse');
         });
+    },
+
+    getHeaders: function(jqXHR) {
+      return 'HTTP/1.1 ' + jqXHR.status + ' ' + jqXHR.statusText + "\n" + jqXHR.getAllResponseHeaders();
     },
 
     invokeRequest: function(method, url, data, headers) {
