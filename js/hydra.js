@@ -12,6 +12,10 @@
     getTypeDefinition: function(url, vocab) {
       var type = this.getElementDefinition(url);
 
+      if (!type) {
+        return null;
+      }
+
       if ('rdfs:Class' !== type['@type']) {
         type = this.getElementDefinition(type.domain);
       }
@@ -502,9 +506,8 @@
         return;
       }
 
-      var vocabUrl = url.split('#', 2)[0];
 
-      if (vocabUrl === self.documentation.model.get('vocabUrl')) {
+      if (self.documentation.model.getTypeDefinition(url)) {
         self.documentation.model.set({ 'type' : url });
 
         return;
@@ -512,6 +515,7 @@
 
       self.documentation.model.set({ 'type' : null });
 
+      var vocabUrl = url.split('#', 2)[0];
       var jqxhr = $.getJSON('proxy.php', { 'url': vocabUrl }, function(resource) {
         //self.vent.trigger('response', { resource: resource });
         // TODO Merge the vocabulary into the documentation model
@@ -542,26 +546,20 @@
       var operations = [];
       var showModal = _.after(elements.length, function() {
         self.operationsModal.model.update(operations, target);
-
         self.operationsModal.widget.modal('show');
       });
-      //self.operationsModal.model.update(elements.operations, target);
 
       _.each(elements, function(element) {
-        var vocabUrl = element.split('#', 2)[0];
+        element = self.documentation.model.getElementDefinition(element);
 
-        if (vocabUrl === self.documentation.model.get('vocabUrl')) {
-          element = self.documentation.model.getElementDefinition(element);
-
+        if (element) {
           if ('operations' in element) {
             operations = _.union(operations, element.operations);
           }
 
           showModal();
-
-          //self.operationsModal.widget.modal('show');
-
         } else {
+          var vocabUrl = element.split('#', 2)[0];
           var jqxhr = $.getJSON('proxy.php', { 'url': vocabUrl }, function(resource) {
             // TODO Merge the vocabulary into the documentation model
             var vocab = resource['@graph'];
@@ -573,7 +571,6 @@
           }).fail(function() {
             alert("Can't find documentation for property " + elements);
           }).always(function() {
-            //self.operationsModal.widget.modal('show');
             showModal();
           });
         }
