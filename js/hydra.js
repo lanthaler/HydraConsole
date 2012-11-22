@@ -161,7 +161,7 @@
       var types = null;
 
       // TODO Add support for multiple types
-      if ((null === types) && (element.parent().parent().siblings('.prop[data-iri="@type"]').length > 0)) {
+      if (('@id' === element.parent().parent().attr('data-iri')) && (element.parent().parent().siblings('.prop[data-iri="@type"]').length > 0)) {
         types = JSON.parse(element.parent().parent().siblings('.prop[data-iri="@type"]').children('span')[1].title)['@id'];
       }
 
