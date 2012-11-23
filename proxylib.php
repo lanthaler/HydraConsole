@@ -71,6 +71,11 @@ class AjaxProxy
     protected $_requestCookies    = NULL;
 
     /**
+     * Will hold the request Authorization header
+     */
+    protected $_requestAuthorization = NULL;
+
+    /**
      * Will hold the body of the request submitted by the client
      * @var string
      */
@@ -187,6 +192,7 @@ class AjaxProxy
         $this->_loadRequestMethod();
         $this->_loadRequestCookies();
         $this->_loadRequestUserAgent();
+        $this->_loadRequestAuthorizationHeader();
         $this->_loadRawHeaders();
         $this->_loadContentType();
         $this->_loadUrl();
@@ -273,6 +279,21 @@ class AjaxProxy
         if($this->_requestCookies !== NULL) return;
 
         $this->_requestCookies = $_COOKIE;
+    }
+
+    /**
+     * Store the Authorization header in _requestAuthorization
+     *  property
+     */
+    protected function _loadRequestAuthorizationHeader()
+    {
+        if($this->_requestAuthorization !== NULL) return;
+
+        $headers = apache_request_headers();
+
+        if (isset($headers['Authorization'])) {
+            $this->_requestAuthorization = $headers['Authorization'];
+        }
     }
 
     /**
@@ -534,15 +555,19 @@ class AjaxProxy
      */
     protected function _generateProxyRequestHeaders($as_string = FALSE)
     {
-        $headers                 = array();
-        $headers['Content-Type'] = $this->_requestContentType;
+        $headers = array();
+        $headers[] = 'Content-Type: ' . $this->_requestContentType;
+
+        if ($this->_requestAuthorization) {
+            $headers[] = 'Authorization: ' . $this->_requestAuthorization;
+        }
 
         if($as_string)
         {
             $data = "";
-            foreach($headers as $name => $value)
+            foreach($headers as $value)
                 if($value)
-                    $data .= "$name: $value\n";
+                    $data .= "$value\n";
 
             $headers = $data;
         }
