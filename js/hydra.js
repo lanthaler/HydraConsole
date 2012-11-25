@@ -531,8 +531,7 @@
             data: null,
             headers: self.getHeaders(jqXHR)
           });
-
-          alert('Request failed');
+          self.addressbar.setUrl(url);
         })
         .always(function() {
           $('#load').addClass('btn-inverse');
