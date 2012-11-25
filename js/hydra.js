@@ -503,10 +503,16 @@
           //self.vent.trigger('response', { resource: resource });
 
           if (resource.trim().length > 0) {
+            resource = JSON.parse(resource);
+
             self.response.model.set({
-              data: JSON.parse(resource),
+              data: resource,
               headers: self.getHeaders(jqXHR)
             });
+
+            if (_.isObject(resource) && ('@type' in resource)) {
+              self.showDocumentation(resource['@type'].__value.__value['@id']);
+            }
           } else {
             self.response.model.set({
               data: null,
@@ -518,10 +524,6 @@
             self.addressbar.setUrl(jqXHR.getResponseHeader('Content-Location'));
           } else {
             self.addressbar.setUrl(url);
-          }
-
-          if (_.isObject(resource) && ('@type' in resource)) {
-            self.showDocumentation(resource['@type'].__value.__value['@id']);
           }
         })
         .fail(function(jqXHR) {
