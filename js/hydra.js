@@ -1,4 +1,6 @@
 (function() {
+  "use strict";
+
   var Hydra = {
     Models: {},
     Views: {}
@@ -20,7 +22,7 @@
         type = this.getElementDefinition(type.domain);
       }
 
-      var vocab = vocab || this.get('vocab');
+      vocab = vocab || this.get('vocab');
       type.properties = _.filter(vocab, function(entry) {
         return entry['domain'] === type['@id'];
       });
@@ -36,7 +38,7 @@
     },
 
     getElementDefinition: function(url, vocab) {
-      var vocab = vocab || this.get('vocab');
+      vocab = vocab || this.get('vocab');
 
       var element = _.find(vocab, function(entry) {
         return entry['@id'] === url;
@@ -46,7 +48,7 @@
     },
 
     getTypes: function(vocab) {
-      var vocab = vocab || this.get('vocab');
+      vocab = vocab || this.get('vocab');
 
       var types = _.filter(vocab, function(entry) {
         return ('rdfs:Class' === entry['@type']);
@@ -59,8 +61,9 @@
 
   Hydra.Models.OperationsModal = Backbone.Model.extend({
     update: function(operations, target) {
+      var i;
 
-      for (var i = operations.length - 1; i >= 0; i--) {
+      for (i = operations.length - 1; i >= 0; i--) {
         var def;
         if (operations[i].expects) {
           def = window.HydraClient.getElementDefinition(operations[i].expects);
@@ -79,11 +82,11 @@
 
       if (target) {
         operations = _.union(operations, [
-          { "method": "GET", "default": true },
-          { "method": "POST", "default": true },
-          { "method": "PUT", "default": true },
-          { "method": "DELETE", "default": true },
-          { "method": "PATCH", "default": true }
+          { "method": "GET", "isDefault": true },
+          { "method": "POST", "isDefault": true },
+          { "method": "PUT", "isDefault": true },
+          { "method": "DELETE", "isDefault": true },
+          { "method": "PATCH", "isDefault": true }
         ]);
       }
 
@@ -96,22 +99,20 @@
       };
 
       operations = _.sortBy(operations, function(operation) {
-        return methodSortOrder[operation.method] + ((operation.default) ? -1 : 0);
+        return methodSortOrder[operation.method] + ((operation.isDefault) ? -1 : 0);
       });
 
       var length = operations.length;
       var method = operations[length - 1].method;
-      for (var i = length - 2; i >= 0; i--) {
-        if ((true === operations[i].default) && (method === operations[i].method)) {
+      for (i = length - 2; i >= 0; i--) {
+        if ((true === operations[i].isDefault) && (method === operations[i].method)) {
           operations.splice(i, 1);
         } else {
           method = operations[i].method;
         }
       }
 
-
-
-      this.set({ 'operations': operations, 'target': target, 'selected': null ,});
+      this.set({ 'operations': operations, 'target': target, 'selected': null });
     }
   });
 
@@ -166,7 +167,7 @@
       }
 
       do {
-        if (element.hasClass('prop') && element.attr('data-iri') && '@id' !== element.attr('data-iri')) {
+        if (element.hasClass('prop') && element.attr('data-iri') && ('@id' !== element.attr('data-iri'))) {
           property = element.attr('data-iri');
           break;
         }
@@ -201,8 +202,7 @@
           this.$el.html(
             '<span class="muted">' +
             _.escape(this.model.get('headers')).replace(/\n/g, '<br>') +
-            '</span><br>'
-          );
+            '</span><br>');
         } else {
           this.$el.html('<span class="muted">empty</span>');
         }
@@ -212,10 +212,11 @@
 
     renderResponse: function(data, indent, last) {
       var result = '';
+      var i;
 
       if (_.isArray(data)) {
         result += '[<br>' + indent;
-        for (var i = 0; i < data.length; i++) {
+        for (i = 0; i < data.length; i++) {
           result += '  ';
           result += this.renderResponse(data[i], indent + '  ', (i === data.length - 1));
           result += indent;
@@ -230,7 +231,7 @@
           if ('@id' in data.__value) {
             result += '><a href="' + data.__value['@id'] + '">';
           } else {
-             result += ' class="literal">'
+             result += ' class="literal">';
           }
           result += _.escape(JSON.stringify(data.__orig_value));
           if ('@id' in data.__value) {
@@ -248,7 +249,7 @@
         result += '{<br>';
 
         var keys = _.keys(data);
-        for (var i = 0; i < keys.length; i++) {
+        for (i = 0; i < keys.length; i++) {
           var key = keys[i];
           var value = data[key];
 
@@ -304,7 +305,7 @@
       this.typesMenu.on("click", "a", function(e) {
         e.preventDefault();
         window.HydraClient.showDocumentation(e.target.href);
-      })
+      });
     },
 
     /*events: {
@@ -393,7 +394,7 @@
         self.model.set({ 'selected': $(this).attr('data-index') });
       });
 
-      $('#operationsForm').on('submit', function() { return self.onInvoke() });
+      $('#operationsForm').on('submit', function() { return self.onInvoke(); });
 
       return this;
     },
@@ -413,8 +414,7 @@
         window.HydraClient.request(
           operation.method,
           self.model.get('target'),
-          self.getRequestBody(self.model.get('expectsDef'))
-        );
+          self.getRequestBody(self.model.get('expectsDef')));
       }
 
       self.dialog.modal('hide');
@@ -443,7 +443,7 @@
       result['@type'] = expects['@id'];
 
       _.each(formData, function(element) {
-        result[element.name] = ('' == element.value) ? null : element.value;
+        result[element.name] = ('' === element.value) ? null : element.value;
       });
 
       return JSON.stringify(result);
@@ -464,7 +464,7 @@
           'Accept': 'application/ld+json, application/json;q=0.1'
         },
         'contentType': 'application/ld+json',
-        'dataType': 'json',
+        'dataType': 'json'
         // cache: false
       });
 
@@ -494,12 +494,12 @@
     request: function(method, url, data) {
       var self = this;
 
-      data = data || null
+      data = data || null;
 
       $('#load').removeClass('btn-inverse');
 
-      var jqxhr = self.invokeRequest(method, url, data)
-        .done(function(resource, textStatus, jqXHR) {
+      var jqxhr = self.invokeRequest(method, url,
+        data).done(function(resource, textStatus, jqXHR) {
           //self.vent.trigger('response', { resource: resource });
 
           if (resource.trim().length > 0) {
@@ -525,15 +525,13 @@
           } else {
             self.addressbar.setUrl(url);
           }
-        })
-        .fail(function(jqXHR) {
+        }).fail(function(jqXHR) {
           self.response.model.set({
             data: null,
             headers: self.getHeaders(jqXHR)
           });
           self.addressbar.setUrl(url);
-        })
-        .always(function() {
+        }).always(function() {
           $('#load').addClass('btn-inverse');
         });
     },
@@ -600,7 +598,7 @@
       //
       elements = _.filter(elements, function(element) {
         return ((undefined !== element) && (null !== element));
-      })
+      });
 
       if (0 === elements.length) {
         return;
@@ -651,8 +649,7 @@
 $('#addressbar').on("submit", function () {
     window.HydraClient.get($('#url').val());
     return false;
-  })
-;
+});
 
 $('#response').on("mouseenter", ".prop", function () {
     var property = $(this).attr('data-iri');
@@ -664,16 +661,14 @@ $('#response').on("mouseenter", ".prop", function () {
         $(document.getElementById(property)).addClass("prop-highlight");
       }
     }
-  })
-;
+});
 
 $('#response').on("mouseleave", ".prop", function () {
     var property = $(this).attr('data-iri');
     if (property && document.getElementById(property)) {
       $(document.getElementById(property)).removeClass("prop-highlight");
     }
-  })
-;
+});
 
 // $('#response').on("mouseenter", ".context", function () {
 //     var property = $(this).attr('data-original-title') || $(this).attr('title');

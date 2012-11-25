@@ -148,7 +148,7 @@ above and click on &quot;Load&quot;
                 <% } %>
                 <ul class="dropdown-menu">
                 <% _.each(operations, function(operation, index) { %>
-                  <li><a href="#" class="operation" data-index="<%= index %>"><span class="label<% if (true !== operation.default) print(' label-info'); %>"><%= operation.method %></span>
+                  <li><a href="#" class="operation" data-index="<%= index %>"><span class="label<% if (true !== operation.isDefault) print(' label-info'); %>"><%= operation.method %></span>
                     <% if (operation.label) { %><%= operation.label %><% } else { %><span class="muted">no documentation available</span><% } %></a></li>
                 <% }); %>
                 </ul>
