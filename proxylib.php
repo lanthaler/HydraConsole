@@ -582,6 +582,10 @@ class AjaxProxy
             $headers[] = 'Authorization: ' . $this->_requestAuthorization;
         }
 
+        if ($this->_requestAccept) {
+            $headers[] = 'Accept: ' . $this->_requestAccept;
+        }
+
         if($as_string)
         {
             $data = "";
