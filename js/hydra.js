@@ -188,7 +188,7 @@
 
     render: function() {
       if (null !== this.model.get('data')) {
-        this.$el.html( this.renderResponse(this.model.get('data'), '', false));
+        this.$el.html( this.renderResponse(this.model.get('data'), '', true));
         $('.prop-key').tooltip({ 'placement': 'right' });
         $('.literal').tooltip({ 'placement': 'right' });
         $('.context').popover( {
@@ -260,7 +260,7 @@
             result += '</pre>">';
             result += _.escape(JSON.stringify(value.__value, null, 2)).replace(/\n/g, '<br>  ' + indent);
             result += '</span>';
-            result += (last) ? '' : ',';
+            result += (i === keys.length - 1) ? '' : ',';
             result += '<br>';
           } else {
             if ('__iri' in value) {
@@ -276,9 +276,9 @@
         result += indent + '}';
       } else {
         result += _.escape(JSON.stringify(data));
-        result += (last) ? '' : ',';
       }
 
+      result += (last) ? '' : ',';
       result += '<br>';
 
       return result;
