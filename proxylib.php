@@ -76,6 +76,11 @@ class AjaxProxy
     protected $_requestAuthorization = NULL;
 
     /**
+     * Will hold the request Accept header
+     */
+    protected $_requestAccept = NULL;
+
+    /**
      * Will hold the body of the request submitted by the client
      * @var string
      */
@@ -193,6 +198,7 @@ class AjaxProxy
         $this->_loadRequestCookies();
         $this->_loadRequestUserAgent();
         $this->_loadRequestAuthorizationHeader();
+        $this->_loadRequestAcceptHeader();
         $this->_loadRawHeaders();
         $this->_loadContentType();
         $this->_loadUrl();
@@ -289,10 +295,24 @@ class AjaxProxy
     {
         if($this->_requestAuthorization !== NULL) return;
 
-        $headers = apache_request_headers();
+        $this->_loadRawHeaders();
 
-        if (isset($headers['Authorization'])) {
-            $this->_requestAuthorization = $headers['Authorization'];
+        if (key_exists('Authorization', $this->_rawHeaders)) {
+            $this->_requestAuthorization = $this->_rawHeaders['Authorization'];
+        }
+    }
+
+    /**
+     * Store the Accept header in _requestAccept property
+     */
+    protected function _loadRequestAcceptHeader()
+    {
+        if($this->_requestAccept !== NULL) return;
+
+        $this->_loadRawHeaders();
+
+        if (key_exists('Accept', $this->_rawHeaders)) {
+            $this->_requestAccept = $this->_rawHeaders['Accept'];
         }
     }
 
@@ -596,6 +616,8 @@ class AjaxProxy
      */
     protected function _generateProxyResponseHeaders()
     {
+        header($this->_responseHeaders['status']);
+
         foreach($this->_responseHeaders as $name => $value)
         {
             if($name != 'status')
