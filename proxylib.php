@@ -622,6 +622,10 @@ class AjaxProxy
     {
         header($this->_responseHeaders['status']);
 
+        // Let the server handle the Content-Lenght and Transfer-Encoding headers
+        unset($this->_responseHeaders['Content-Length']);
+        unset($this->_responseHeaders['Transfer-Encoding']);
+
         foreach($this->_responseHeaders as $name => $value)
         {
             if($name != 'status')
