@@ -9,7 +9,7 @@ use ML\JsonLD\JsonLD;
 use ML\JsonLD\Processor;
 
 
-// Mimic apache_request_headers() if not present (taken from PHP doc)
+// Mimic apache_request_headers() if not present (adapted from PHP doc)
 if(!function_exists('apache_request_headers')) {
   function apache_request_headers() {
     $arh = array();
@@ -22,7 +22,9 @@ if(!function_exists('apache_request_headers')) {
         // this should work in most cases
         $rx_matches = explode('_', $arh_key);
         if (count($rx_matches) > 0 and strlen($arh_key) > 2) {
-          foreach($rx_matches as $ak_key => $ak_val) $rx_matches[$ak_key] = ucfirst($ak_val);
+          foreach($rx_matches as $ak_key => $ak_val) {
+            $rx_matches[$ak_key] = ucfirst(strtolower($ak_val));
+          }
           $arh_key = implode('-', $rx_matches);
         }
         $arh[$arh_key] = $val;
