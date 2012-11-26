@@ -263,7 +263,7 @@ tracker at <a href="http://www.markus-lanthaler.com/hydra/api-demo/" data-action
         <tr id="<%= property['@id'] %>">
           <th><%= property.label %></th>
           <td>
-            <code title="<%- property.range %>"><% if (property.range) { print(_.escape((property.rangeLabel) ? property.rangeLabel : property.range)); } else { print('<span class="muted">not specified</span>'); }; %></code>
+            <code title="<%- property.range %>"><% if (property.range) { print(_.escape((property.rangeLabel) ? property.rangeLabel : property.range)); } else { print('<span class="muted">not&nbsp;specified</span>'); }; %></code>
             <% if (property.readonly) { %><br /><small class="muted">readonly</small><% } %>
             <% if (property.writeonly) { %><br /><small class="muted">writeonly</small><% } %>
           </td>
