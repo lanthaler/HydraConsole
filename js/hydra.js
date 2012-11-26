@@ -152,7 +152,7 @@
       var $target = $(e.target);
       var uri = $target.attr('href') || $target.parent().attr('href');
 
-      if (e.shiftKey) {
+      if (e.shiftKey || ('GET' === $target.attr('data-action'))) {
         window.HydraClient.get(uri);
         return;
       }
@@ -670,27 +670,10 @@ $('#response').on("mouseleave", ".prop", function () {
     }
 });
 
-// $('#response').on("mouseenter", ".context", function () {
-//     var property = $(this).attr('data-original-title') || $(this).attr('title');
-//     if (property && document.getElementById(property)) {
-//       $(document.getElementById(property)).addClass("prop-highlight");
-//     }
-//   })
-// ;
-
-// $('#response').on("mouseleave", ".context", function () {
-//     var property = $(this).attr('data-original-title') || $(this).attr('title');
-//     if (property && document.getElementById(property)) {
-//       $(document.getElementById(property)).removeClass("prop-highlight");
-//     }
-//   })
-// ;
-
-
 
 $(document).ready(function() {
-  window.HydraClient.showDocumentation();
-  //window.HydraClient.get('http://hydra.test/users/1');
-  window.HydraClient.get('http://hydra.test/app_dev.php/');
+  // window.HydraClient.showDocumentation();
+  // //window.HydraClient.get('http://hydra.test/app_dev.php/');
+  // window.HydraClient.get('http://www.markus-lanthaler.com/hydra/api-demo/');
   $('#url').focus();
 });

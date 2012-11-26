@@ -78,8 +78,13 @@
 <pre id="response">
 Hi,
 
-This is the Hydra Console. This field here will show you retrieved responses
-In the pane to the right you'll find the corresponding documentation.
+This is the Hydra Console - a generic client for Hydra-powered Web APIs. The
+user interface consists of three parts: the address bar on the top, this
+response pane, and the documentation pane.
+
+As the name suggests, the address bar allows you to enter an URL to access
+the Web API. The response will then be rendered in the response pane and
+in the pane to the right you'll find the corresponding documentation.
 
 When you move your mouse over a property, the corresponding item in the
 documentation will be highlighted. Additionally, a tooltip with the full IRI
@@ -87,10 +92,12 @@ of the property will be shown. If you move your mouse over a context
 definition, the active context at that level will be shown.
 
 All links are blue and underlined. To invoke an operation, simply click on
-it and follow the instructions.
+it and follow the instructions. If you want to browse an API and GET the
+target of a link, simply press the SHIFT-key while clicking on a link.
 
-We've had enough of words :-) To get started, enter a URL in the addressbar
-above and click on &quot;Load&quot;
+To get started, enter the URL of the API in the address bar above and click
+on &quot;Load&quot;. If you wish, you can use the demo API featuring a simple issue
+tracker at <a href="http://www.markus-lanthaler.com/hydra/api-demo/" data-action="GET">http://www.markus-lanthaler.com/hydra/api-demo/</a>.
 </pre>
 <!--          <div id="pagination" class="pull-right">
           <a class="btn btn-info btn-small" href="#"><i class="icon-chevron-left icon-white"></i></a>
@@ -270,14 +277,6 @@ above and click on &quot;Load&quot;
         </tbody>
       </table>
   </script>
-  <div id="jqxhr-fail-template" style="display:none">
-      <pre>
-  <%= jqxhr.status %> <%= jqxhr.statusText %>
-
-  <%= jqxhr.getAllResponseHeaders() %>
-      </pre>
-  </div>
-
   <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.1.1/bootstrap.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.2/underscore-min.js"></script>
