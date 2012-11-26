@@ -201,7 +201,7 @@
         if (this.model.get('headers')) {
           this.$el.html(
             '<span class="muted">' +
-            _.escape(this.model.get('headers')).replace(/\n/g, '<br>') +
+            _.escape(this.model.get('headers')) +
             '</span><br>');
         } else {
           this.$el.html('<span class="muted">empty</span>');
