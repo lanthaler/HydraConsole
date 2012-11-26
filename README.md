@@ -10,7 +10,7 @@ of a single-page application.
 
 ***This is highly experimental stuff that isn't ready for production use.***
 
-To participate in the development of please file bugs and issues in the
+To participate in the development please file bugs and issues in the
 issue tracker or submit pull requests. If there's enough interest I'll
 create a dedicated mailing list in the future.
 
