@@ -337,7 +337,7 @@ class AjaxProxy
     {
         if($this->_rawHeaders !== NULL) return;
 
-        $this->_rawHeaders = getallheaders();
+        $this->_rawHeaders = apache_request_headers();
 
         if($this->_rawHeaders === FALSE)
             throw new Exception("Could not get request headers");
