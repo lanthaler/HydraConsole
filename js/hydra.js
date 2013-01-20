@@ -195,7 +195,8 @@
         $('.context').popover( {
           'trigger': 'hover',
           'placement': 'right',
-          'title': 'Active context'
+          'title': 'Active context',
+          'html': true
         });
       } else {
         if (this.model.get('headers')) {
