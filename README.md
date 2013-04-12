@@ -15,4 +15,4 @@ issue tracker or submit pull requests. If there's enough interest I'll
 create a dedicated mailing list in the future.
 
 You can find more information about Hydra and a demo on my homepage:
-http://www.markus-lanthaler.com/hydra
+http://www.markus-lanthaler.com/hydra/
