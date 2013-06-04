@@ -329,15 +329,14 @@
 
     render: function() {
       var type = this.model.get('type');
+      var definition;
       if (null === type) {
         this.title.html('');
         this.details.html('<p>Loading ...</p>');
-      } else if (false === type) {
+      } else if ((false === type) || (null === (definition = this.model.getTypeDefinition(this.model.get('type'))))) {
         this.title.html('');
         this.details.html('<p>Loading the documentation failed.</p>');
       } else {
-        var definition = this.model.getTypeDefinition(this.model.get('type'));
-
         this.title.attr('href', definition['@id']);
         this.title.html('<h4>' + _.escape(definition.label) + ' <b class="caret"></b></h4>');
         this.details.html(this.template({ 'docu': definition }));
