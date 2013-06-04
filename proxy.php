@@ -39,6 +39,7 @@ $options = new \stdClass();
 $options->base = $_GET['url'];
 
 $debug = isset($_GET['debug']) ? (boolean)$_GET['debug'] : false;
+$frame = isset($_GET['vocab']) ? (boolean)$_GET['vocab'] : false;
 
 $debugExpansion = function($document)
 {
@@ -68,11 +69,81 @@ $debugExpansion = function($document)
   }
 };
 
+$frameApiDocumentation = function($document)
+{
+  if (0 === strlen(trim($document))) {
+    return $document;
+  }
+
+  global $options;
+  try
+  {
+    $frame = '
+{
+  "@context": {
+    "hydra": "http://purl.org/hydra/core#",
+    "ApiDocumentation": "hydra:ApiDocumentation",
+    "property": { "@id": "hydra:property", "@type": "@id" },
+    "readonly": "hydra:readonly",
+    "writeonly": "hydra:writeonly",
+    "supportedClasses": "hydra:supportedClasses",
+    "supportedProperties": { "@id": "hydra:supportedProperties", "@container": "@set" },
+    "supportedOperations": { "@id": "hydra:supportedOperations", "@container": "@set" },
+    "method": "hydra:method",
+    "expects": { "@id": "hydra:expects", "@type": "@id" },
+    "returns": { "@id": "hydra:returns", "@type": "@id" },
+    "statusCodes": { "@id": "hydra:statusCodes", "@container": "@set" },
+    "code": "hydra:statusCode",
+    "rdfs": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "label": "rdfs:label",
+    "description": "rdfs:comment",
+    "domain": { "@id": "rdfs:domain", "@type": "@id" },
+    "range": { "@id": "rdfs:range", "@type": "@id" }
+  },
+  "@embedChildren": false,
+  "supportedProperties": {
+    "@default": [ ],
+    "@embed": true
+  },
+  "supportedOperations": {
+    "@default": [ ],
+    "@embed": true,
+    "expects": { "@default": null, "@embed": false },
+    "statusCodes": { "@default": [], "@embed": true }
+  }
+}
+    ';
+
+    $document = JsonLD::frame(JsonLD::expand($document, $options), $frame);
+    //unset($document->{'@graph'}[0]);
+
+    $result = JsonLD::toString($document);
+
+    return $result;
+  }
+  catch (Exception $e)
+  {
+    $exceptionName = get_class($e);
+    if (false !== ($pos = strrpos(get_class($e), '\\')))
+    {
+      $exceptionName = substr($exceptionName, $pos + 1);
+    }
+
+    header('HTTP/1.1 400 ' . $exceptionName); //Bad Request');
+    print htmlspecialchars($e->getMessage());
+
+    die();
+  }
+};
+
 
 $proxy = new AjaxProxy();
 
 if ($debug) {
   $proxy->setResponseModifier($debugExpansion);
+} elseif ($frame) {
+  $proxy->setResponseModifier($frameApiDocumentation);
+
 }
 
 $proxy->execute();

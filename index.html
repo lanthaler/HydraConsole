@@ -189,9 +189,9 @@ tracker at <a href="http://www.markus-lanthaler.com/hydra/api-demo/" data-action
           </tr>
           <tr>
             <td>Status Codes:</td>
-            <td><% if (operations[selected].status_codes && (operations[selected].status_codes.length > 0)) { %>
-              <% _.each(operations[selected].status_codes, function(status_code) { %>
-                <code><%- status_code.code %></code> <%- status_code.description %>
+            <td><% if (operations[selected].statusCodes && (operations[selected].statusCodes.length > 0)) { %>
+              <% _.each(operations[selected].statusCodes, function(statusCode) { %>
+                <code><%- statusCode.code %></code> <%- statusCode.description %>
               <% }); %>
             <% } else { %>
               <span class="muted">n/a</span>
@@ -254,7 +254,7 @@ tracker at <a href="http://www.markus-lanthaler.com/hydra/api-demo/" data-action
           </td>
           <td>
             The entity&#039;s IRI
-            <% if (docu.operations.length > 0) { %>
+            <% if (docu.supportedOperations.length > 0) { %>
             <p><a class="btn btn-link btn-small operations" data-iri="<%- docu['@id'] %>" href="#"><i class="icon-tags icon"></i> Operations</a></p>
             <% } %>
           </td>
@@ -268,7 +268,7 @@ tracker at <a href="http://www.markus-lanthaler.com/hydra/api-demo/" data-action
             <% if (property.writeonly) { %><br /><small class="muted">writeonly</small><% } %>
           </td>
           <td>
-            <%= property.description.replace(/\n/g, '<br>') %><% if (property.operations.length > 0) { %><br />
+            <%= property.description.replace(/\n/g, '<br>') %><% if (property.supportedOperations.length > 0) { %><br />
             <a class="btn btn-link btn-small operations" data-iri="<%- property['@id'] %>" href="#"><i class="icon-tags icon"></i> Operations</a>
             <% } %>
           </td>
