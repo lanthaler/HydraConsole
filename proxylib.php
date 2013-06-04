@@ -638,6 +638,11 @@ class AjaxProxy
      */
     protected function _buildAndExecuteProxyResponse()
     {
+        if($this->_responseModifier)
+        {
+          $data = call_user_func_array($this->_responseModifier, array(&$this->_responseBody, &$this->_responseHeaders));
+        }
+
         $this->_generateProxyResponseHeaders();
 
         $this->_output($this->_responseBody);
@@ -650,11 +655,6 @@ class AjaxProxy
      */
     protected function _output($data)
     {
-        if($this->_responseModifier)
-        {
-          $data = call_user_func($this->_responseModifier, $data);
-        }
-
         echo $data;
     }
 

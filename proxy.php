@@ -34,25 +34,22 @@ if(!function_exists('apache_request_headers')) {
   }
 }
 
-
 $options = new \stdClass();
 $options->base = $_GET['url'];
 
 $debug = isset($_GET['debug']) ? (boolean)$_GET['debug'] : false;
 $frame = isset($_GET['vocab']) ? (boolean)$_GET['vocab'] : false;
 
-$debugExpansion = function($document)
+$debugExpansion = function(&$document, &$headers)
 {
   if (0 === strlen(trim($document))) {
-    return $document;
+    return;
   }
 
   global $options;
   try
   {
-    $result = JsonLD::toString(JsonLD::expand($document, $options, true));
-
-    return $result;
+    $document = JsonLD::toString(JsonLD::expand($document, $options, true));
   }
   catch (Exception $e)
   {
@@ -69,10 +66,17 @@ $debugExpansion = function($document)
   }
 };
 
-$frameApiDocumentation = function($document)
+$frameApiDocumentation = function(&$document, &$headers)
 {
+  if(isset($headers) && array_key_exists('Location', $headers)) {
+    $_GET['url'] = trim($headers['Location']);
+    $headers['Location'] = $_SERVER['SCRIPT_NAME'] . '?' . http_build_query($_GET);
+
+    return;
+  }
+
   if (0 === strlen(trim($document))) {
-    return $document;
+    return;
   }
 
   global $options;
@@ -80,26 +84,32 @@ $frameApiDocumentation = function($document)
   {
     $frame = '
 {
-  "@context": {
-    "hydra": "http://purl.org/hydra/core#",
-    "ApiDocumentation": "hydra:ApiDocumentation",
-    "property": { "@id": "hydra:property", "@type": "@id" },
-    "readonly": "hydra:readonly",
-    "writeonly": "hydra:writeonly",
-    "supportedClasses": "hydra:supportedClasses",
-    "supportedProperties": { "@id": "hydra:supportedProperties", "@container": "@set" },
-    "supportedOperations": { "@id": "hydra:supportedOperations", "@container": "@set" },
-    "method": "hydra:method",
-    "expects": { "@id": "hydra:expects", "@type": "@id" },
-    "returns": { "@id": "hydra:returns", "@type": "@id" },
-    "statusCodes": { "@id": "hydra:statusCodes", "@container": "@set" },
-    "code": "hydra:statusCode",
-    "rdfs": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-    "label": "rdfs:label",
-    "description": "rdfs:comment",
-    "domain": { "@id": "rdfs:domain", "@type": "@id" },
-    "range": { "@id": "rdfs:range", "@type": "@id" }
-  },
+  "@context": [
+    {
+      "hydra": "http://purl.org/hydra/core#",
+      "ApiDocumentation": "hydra:ApiDocumentation",
+      "hydra:Class": "hydra:Class",
+      "property": { "@id": "hydra:property", "@type": "@id" },
+      "readonly": "hydra:readonly",
+      "writeonly": "hydra:writeonly",
+      "supportedClasses": "hydra:supportedClasses",
+      "supportedProperties": { "@id": "hydra:supportedProperties", "@container": "@set" },
+      "supportedOperations": { "@id": "hydra:supportedOperations", "@container": "@set" },
+      "method": "hydra:method",
+      "expects": { "@id": "hydra:expects", "@type": "@id" },
+      "returns": { "@id": "hydra:returns", "@type": "@id" },
+      "statusCodes": { "@id": "hydra:statusCodes", "@container": "@set" },
+      "code": "hydra:statusCode",
+      "rdfs": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "label": "rdfs:label",
+      "description": "rdfs:comment",
+      "domain": { "@id": "rdfs:domain", "@type": "@id" },
+      "range": { "@id": "rdfs:range", "@type": "@id" }
+    },
+    {
+      "hydra": null
+    }
+  ],
   "@embedChildren": false,
   "supportedProperties": {
     "@default": [ ],
@@ -114,12 +124,12 @@ $frameApiDocumentation = function($document)
 }
     ';
 
-    $document = JsonLD::frame(JsonLD::expand($document, $options), $frame);
-    //unset($document->{'@graph'}[0]);
-
-    $result = JsonLD::toString($document);
-
-    return $result;
+    $document = JsonLD::toString(
+      JsonLD::frame(
+        JsonLD::expand($document, $options),
+        $frame
+      )
+    );
   }
   catch (Exception $e)
   {
