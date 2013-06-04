@@ -42,7 +42,8 @@ $frame = isset($_GET['vocab']) ? (boolean)$_GET['vocab'] : false;
 
 $debugExpansion = function(&$document, &$headers)
 {
-  if (0 === strlen(trim($document))) {
+  if ((isset($headers['Content-Type']) && (false === strpos($headers['Content-Type'], 'application/ld+json'))) ||
+    (0 === strlen(trim($document)))) {
     return;
   }
 
@@ -75,7 +76,8 @@ $frameApiDocumentation = function(&$document, &$headers)
     return;
   }
 
-  if (0 === strlen(trim($document))) {
+  if ((isset($headers['Content-Type']) && (false === strpos($headers['Content-Type'], 'application/ld+json'))) ||
+    (0 === strlen(trim($document)))) {
     return;
   }
 
