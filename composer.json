@@ -2,7 +2,7 @@
     "name": "ml/hydra-console",
     "type": "project",
     "description": "HydraConsole is a generic API console for Hydra-powered Web APIs",
-    "keywords": [ "JSON-LD", "jsonld", "Hydra", "Web API", "Symfony", "Symfony2", "hypermedia", "REST" ],
+    "keywords": [ "JSON-LD", "jsonld", "Hydra", "Web API", "API console", "API client", "hypermedia", "REST" ],
     "homepage": "http://www.markus-lanthaler.com/hydra/",
     "license": "MIT",
     "authors": [
