@@ -703,6 +703,8 @@ class AjaxProxy
      */
     protected static function _sendFatalError($message)
     {
+        header('HTTP/1.1 500 Internal Server Error');
+
         die($message);
     }
 }
