@@ -1,0 +1,20 @@
+{
+    "name": "ml/hydra-console",
+    "type": "project",
+    "description": "HydraConsole is a generic API console for Hydra-powered Web APIs",
+    "keywords": [ "JSON-LD", "jsonld", "Hydra", "Web API", "Symfony", "Symfony2", "hypermedia", "REST" ],
+    "homepage": "http://www.markus-lanthaler.com/hydra/",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Markus Lanthaler",
+            "email": "mail@markus-lanthaler.com",
+            "homepage": "http://www.markus-lanthaler.com",
+            "role": "Developer"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "ml/json-ld": "dev-expansion-debug"
+    }
+}

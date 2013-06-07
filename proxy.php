@@ -1,7 +1,7 @@
 <?php
 
 require('proxylib.php');
-require('../../vendor/autoload.php');
+require('vendor/autoload.php');
 
 ini_set('html_errors', 0);
 
