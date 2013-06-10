@@ -700,5 +700,5 @@ $(document).ready(function() {
     $('#url').val(queryParams.url);
   }
 
-  $('#url').focus();
+  $('#url').select();
 });
