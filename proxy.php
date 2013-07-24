@@ -51,6 +51,7 @@ $debugExpansion = function(&$document, &$headers)
   try
   {
     $document = JsonLD::toString(JsonLD::expand($document, $options, true));
+    $headers['Content-Type'] = 'application/ld+json';
   }
   catch (Exception $e)
   {
@@ -133,6 +134,7 @@ $frameApiDocumentation = function(&$document, &$headers)
         $frame
       )
     );
+    $headers['Content-Type'] = 'application/ld+json';
   }
   catch (Exception $e)
   {
