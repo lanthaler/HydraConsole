@@ -56,6 +56,25 @@
         return entry['@id'] === url;
       });
 
+      if (!element || !element.label) {
+        if (0 === url.indexOf('http://www.w3.org/2001/XMLSchema#')) {
+          return {
+            '@id': url,
+            'label': url.substr(url.indexOf('#') + 1).toLowerCase()
+          }
+        } else if (0 === url.indexOf('http://purl.org/hydra/core#')) {
+          return {
+            '@id': url,
+            'label': url.substr(url.indexOf('#') + 1)
+          }
+        } else if ('http://www.w3.org/2002/07/owl#Nothing' === url) {
+          return {
+            '@id': url,
+            'label': '--'
+          }
+        }
+      }
+
       return element;
     },
 
