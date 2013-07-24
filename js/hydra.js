@@ -18,7 +18,7 @@
         return null;
       }
 
-      if (('rdfs:Class' !== type['@type']) && ('hydra:Class' !== type['@type'])) {
+      if (('rdfs:Class' !== type['@type']) && ('hydra:Class' !== type['@type']) && type.domain) {
         type = this.getElementDefinition(type.domain);
       }
 
