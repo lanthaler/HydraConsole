@@ -122,7 +122,7 @@ tracker at <a href="http://www.markus-lanthaler.com/hydra/api-demo/" data-action
   </div>
 
   <div class="modal hide fade" id="operationsModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-<script id="operationsModal-template">
+<script type="underscore/template" id="operationsModal-template">
     <form id="operationsForm" class="modal-form">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -242,7 +242,7 @@ tracker at <a href="http://www.markus-lanthaler.com/hydra/api-demo/" data-action
 </script>
   </div>
 
-  <script id="documentation-template" style="display:none">
+  <script type="underscore/template" id="documentation-template" style="display:none">
     <p><%= docu.description.replace(/\n/g, '<br>') %></p>
     <table class="table table-hover">
       <tbody>
