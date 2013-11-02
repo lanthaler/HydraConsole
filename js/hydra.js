@@ -622,8 +622,8 @@
         self.operationsModal.widget.modal('show');
       });
 
-      _.each(elements, function(element_iri) {
-        var element = self.documentation.model.getElementDefinition(element_iri);
+      _.each(elements, function(elementIri) {
+        var element = self.documentation.model.getElementDefinition(elementIri);
 
         if (element) {
           if ('supportedOperations' in element) {
@@ -632,11 +632,11 @@
 
           showModal();
         } else {
-          var vocabUrl = element_iri.split('#', 2)[0];
+          var vocabUrl = elementIri.split('#', 2)[0];
           var jqxhr = $.getJSON('proxy.php', { 'url': vocabUrl, 'vocab': 1 }, function(resource) {
             // TODO Merge the vocabulary into the documentation model
             var vocab = resource['@graph'];
-            element = self.documentation.model.getElementDefinition(element_iri, vocab);
+            element = self.documentation.model.getElementDefinition(elementIri, vocab);
 
             if ('supportedOperations' in element) {
               operations = _.union(operations, element.supportedOperations);
