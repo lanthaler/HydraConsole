@@ -42,6 +42,13 @@ $frame = isset($_GET['vocab']) ? (boolean)$_GET['vocab'] : false;
 
 $debugExpansion = function(&$document, &$headers)
 {
+  if(isset($headers) && array_key_exists('Location', $headers)) {
+    $_GET['url'] = trim($headers['Location']);
+    $headers['Location'] = $_SERVER['SCRIPT_NAME'] . '?' . http_build_query($_GET);
+
+    return;
+  }
+
   if ((isset($headers['Content-Type']) && (false === strpos($headers['Content-Type'], 'application/ld+json'))) ||
     (0 === strlen(trim($document)))) {
     return;
