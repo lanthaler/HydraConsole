@@ -120,167 +120,168 @@ tracker at <a href="http://www.markus-lanthaler.com/hydra/api-demo/" data-action
       </div>
     </div>
   </div>
+</div>
 
-  <div class="modal hide fade" id="operationsModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div class="modal hide fade" id="operationsModal" tabindex="-1" role="dialog">
 <script type="underscore/template" id="operationsModal-template">
-    <form id="operationsForm" class="modal-form">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+  <form id="operationsForm" class="modal-form">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <% if (target) { %>
+      <h3>Invoke an Operation</h3>
+    <% } else { %>
+      <h3>Documented Operations</h3>
+    <% } %>
+    </div>
+    <div id="operationsModal-body" class="modal-body">
       <% if (target) { %>
-        <h3>Invoke an Operation</h3>
-      <% } else { %>
-        <h3>Documented Operations</h3>
-      <% } %>
-      </div>
-      <div id="operationsModal-body" class="modal-body">
-        <% if (target) { %>
-        <form>
-        <table class="table no-border">
-          <tr>
-            <td>Target IRI:</td>
-            <td><code><%= target %></code></td>
-          </tr>
-        <% } else { %>
-        <table class="table no-border">
-        <% } %>
-          <tr>
-            <td>Operation:</td>
-            <td>
-              <div class="dropdown">
-                <% if ((null !== selected) && (selected < operations.length)) { %>
-                  <span class="label label-info"><%= operations[selected].method %></span>
-                  <a class="dropdown-toggle" data-toggle="dropdown" data-trigger="hover" href="#"><% if (operations[selected].label) { %><%= operations[selected].label %><% } else { %><span class="muted">no documentation available</span><% } %> <b class="caret"></b></a>
-                <% } else { %>
-                  <a class="dropdown-toggle" data-toggle="dropdown" data-trigger="hover" href="#">Select an operation <b class="caret"></b></a>
-                <% } %>
-                <ul class="dropdown-menu">
-                <% _.each(operations, function(operation, index) { %>
-                  <li><a href="#" class="operation" data-index="<%= index %>"><span class="label<% if (true !== operation.isDefault) print(' label-info'); %>"><%= operation.method %></span>
-                    <% if (operation.label) { %><%= operation.label %><% } else { %><span class="muted">no documentation available</span><% } %></a></li>
-                <% }); %>
-                </ul>
-              </div>
-            </td>
-          </tr>
-        <% if (selected) { %>
-          <tr>
-            <td>Description:</td>
-            <td><% if (operations[selected].description) { %>
-              <%- operations[selected].description %>
-            <% } else { %>
-              <span class="muted">n/a</span>
-            <% } %></td>
-          </tr>
-          <tr>
-            <td>Expects:</td>
-            <td><% if (operations[selected].expects) { %>
-              <code title="<%- operations[selected].expects %>"><%- (operations[selected].expectsLabel) ? operations[selected].expectsLabel : operations[selected].expects %></code>
-            <% } else { %>
-              <span class="muted">n/a</span>
-            <% } %></td>
-          </tr>
-          <tr>
-            <td>Returns:</td>
-            <td><% if (operations[selected].returns) { %>
-              <code title="<%- operations[selected].returns %>"><%- (operations[selected].returnsLabel) ? operations[selected].returnsLabel : operations[selected].returns %></code>
-            <% } else { %>
-              <span class="muted">n/a</span>
-            <% } %></td>
-          </tr>
-          <tr>
-            <td>Status Codes:</td>
-            <td><% if (operations[selected].statusCodes && (operations[selected].statusCodes.length > 0)) { %>
-              <% _.each(operations[selected].statusCodes, function(statusCode) { %>
-                <code><%- statusCode.code %></code> <%- statusCode.description %>
-              <% }); %>
-            <% } else { %>
-              <span class="muted">n/a</span>
-            <% } %></td>
-          </tr>
-          <% if (target && (('POST' == operations[selected].method) || ('PUT' == operations[selected].method))) { %>
-          <tr class="request">
-            <th colspan="2">Request Data</th>
-          </tr>
-          <% if (expectsDef) { %>
-          <% _.each(expectsDef.properties, function(property) { %>
-          <% if (!property.readonly) { %>
-          <tr class="request">
-            <th><label for="<%- property.label %>"><%- property.label %></label></th>
-            <td>
-              <input type="text" name="<%- property.label %>" class="input-xlarge" placeholder="<%- property.description %>" />
-            </td>
-          </tr>
-          <% } %>
-          <% }); %>
-          <% } else { %>
-          <!--<tr class="request">
-            <th><label for="headers">Request headers</label></th>
-            <td>
-              <textarea rows="3" class="input-xlarge" name="headers" placeholder="Type in the request headers. They will be sent as-is">Content-Type: application/ld+json</textarea>
-            </td>
-          </tr>-->
-          <tr class="request">
-            <th><label for="body">Request body</label></th>
-            <td>
-              <textarea rows="10" class="input-xlarge" name="body" placeholder="Type in the request body. It will be sent as-is"></textarea>
-            </td>
-          </tr>
-          <% } %>
-          <% } %>
-        <% } %>
-        </table>
-        <% if (target) { %>
-        <% } %>
-      </div>
-      <div class="modal-footer">
-      <% if (target) { %>
-        <button class="btn btn-primary">Invoke</button>
-      <% } %>
-        <a href="#" class="btn" data-dismiss="modal">Close</a>
-      </div>
-    </form>
-</script>
-  </div>
-
-  <script type="underscore/template" id="documentation-template" style="display:none">
-    <p><%= docu.description.replace(/\n/g, '<br>') %></p>
-    <table class="table table-hover">
-      <tbody>
+      <form>
+      <table class="table no-border">
         <tr>
-          <th width="50">@id</th>
-          <td width="50">
-            <code>IRI</code>
-            <br /><small class="muted">readonly</small>
-          </td>
+          <td>Target IRI:</td>
+          <td><code><%= target %></code></td>
+        </tr>
+      <% } else { %>
+      <table class="table no-border">
+      <% } %>
+        <tr>
+          <td>Operation:</td>
           <td>
-            The entity&#039;s IRI
-            <% if (docu.supportedOperations.length > 0) { %>
-            <p><a class="btn btn-link btn-small operations" data-iri="<%- docu['@id'] %>" href="#"><i class="icon-tags icon"></i> Operations</a></p>
-            <% } %>
+            <div class="dropdown">
+              <% if ((null !== selected) && (selected < operations.length)) { %>
+                <span class="label label-info"><%= operations[selected].method %></span>
+                <a class="dropdown-toggle" data-toggle="dropdown" data-trigger="hover" href="#"><% if (operations[selected].label) { %><%= operations[selected].label %><% } else { %><span class="muted">no documentation available</span><% } %> <b class="caret"></b></a>
+              <% } else { %>
+                <a class="dropdown-toggle" data-toggle="dropdown" data-trigger="hover" href="#">Select an operation <b class="caret"></b></a>
+              <% } %>
+              <ul class="dropdown-menu">
+              <% _.each(operations, function(operation, index) { %>
+                <li><a href="#" class="operation" data-index="<%= index %>"><span class="label<% if (true !== operation.isDefault) print(' label-info'); %>"><%= operation.method %></span>
+                  <% if (operation.label) { %><%= operation.label %><% } else { %><span class="muted">no documentation available</span><% } %></a></li>
+              <% }); %>
+              </ul>
+            </div>
           </td>
         </tr>
-        <% _.each(docu.properties, function(property) { %>
-        <tr id="<%= property['@id'] %>">
-          <th><%= property.label %></th>
+      <% if (selected) { %>
+        <tr>
+          <td>Description:</td>
+          <td><% if (operations[selected].description) { %>
+            <%- operations[selected].description %>
+          <% } else { %>
+            <span class="muted">n/a</span>
+          <% } %></td>
+        </tr>
+        <tr>
+          <td>Expects:</td>
+          <td><% if (operations[selected].expects) { %>
+            <code title="<%- operations[selected].expects %>"><%- (operations[selected].expectsLabel) ? operations[selected].expectsLabel : operations[selected].expects %></code>
+          <% } else { %>
+            <span class="muted">n/a</span>
+          <% } %></td>
+        </tr>
+        <tr>
+          <td>Returns:</td>
+          <td><% if (operations[selected].returns) { %>
+            <code title="<%- operations[selected].returns %>"><%- (operations[selected].returnsLabel) ? operations[selected].returnsLabel : operations[selected].returns %></code>
+          <% } else { %>
+            <span class="muted">n/a</span>
+          <% } %></td>
+        </tr>
+        <tr>
+          <td>Status Codes:</td>
+          <td><% if (operations[selected].statusCodes && (operations[selected].statusCodes.length > 0)) { %>
+            <% _.each(operations[selected].statusCodes, function(statusCode) { %>
+              <code><%- statusCode.code %></code> <%- statusCode.description %>
+            <% }); %>
+          <% } else { %>
+            <span class="muted">n/a</span>
+          <% } %></td>
+        </tr>
+        <% if (target && (('POST' == operations[selected].method) || ('PUT' == operations[selected].method))) { %>
+        <tr class="request">
+          <th colspan="2">Request Data</th>
+        </tr>
+        <% if (expectsDef) { %>
+        <% _.each(expectsDef.properties, function(property) { %>
+        <% if (!property.readonly) { %>
+        <tr class="request">
+          <th><label for="<%- property.label %>"><%- property.label %></label></th>
           <td>
-            <code title="<%- property.range %>"><% if (property.range) { print(_.escape((property.rangeLabel) ? property.rangeLabel : property.range)); } else { print('<span class="muted">not&nbsp;specified</span>'); }; %></code>
-            <% if (property.readonly) { %><br /><small class="muted">readonly</small><% } %>
-            <% if (property.writeonly) { %><br /><small class="muted">writeonly</small><% } %>
-          </td>
-          <td>
-            <%= property.description.replace(/\n/g, '<br>') %><% if (property.supportedOperations.length > 0) { %><br />
-            <a class="btn btn-link btn-small operations" data-iri="<%- property['@id'] %>" href="#"><i class="icon-tags icon"></i> Operations</a>
-            <% } %>
+            <input type="text" name="<%- property.label %>" class="input-xlarge" placeholder="<%- property.description %>" />
           </td>
         </tr>
+        <% } %>
         <% }); %>
-        </tbody>
+        <% } else { %>
+        <!--<tr class="request">
+          <th><label for="headers">Request headers</label></th>
+          <td>
+            <textarea rows="3" class="input-xlarge" name="headers" placeholder="Type in the request headers. They will be sent as-is">Content-Type: application/ld+json</textarea>
+          </td>
+        </tr>-->
+        <tr class="request">
+          <th><label for="body">Request body</label></th>
+          <td>
+            <textarea rows="10" class="input-xlarge" name="body" placeholder="Type in the request body. It will be sent as-is"></textarea>
+          </td>
+        </tr>
+        <% } %>
+        <% } %>
+      <% } %>
       </table>
-  </script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.2.2/bootstrap.min.js"></script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.3/underscore-min.js"></script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/0.9.10/backbone-min.js"></script>
-  <script src="js/hydra.js"></script>
+      <% if (target) { %>
+      <% } %>
+    </div>
+    <div class="modal-footer">
+    <% if (target) { %>
+      <button class="btn btn-primary">Invoke</button>
+    <% } %>
+      <a href="#" class="btn" data-dismiss="modal">Close</a>
+    </div>
+  </form>
+</script>
+</div>
+
+<script type="underscore/template" id="documentation-template" style="display:none">
+  <p><%= docu.description.replace(/\n/g, '<br>') %></p>
+  <table class="table table-hover">
+    <tbody>
+      <tr>
+        <th width="50">@id</th>
+        <td width="50">
+          <code>IRI</code>
+          <br /><small class="muted">readonly</small>
+        </td>
+        <td>
+          The entity&#039;s IRI
+          <% if (docu.supportedOperations.length > 0) { %>
+          <p><a class="btn btn-link btn-small operations" data-iri="<%- docu['@id'] %>" href="#"><i class="icon-tags icon"></i> Operations</a></p>
+          <% } %>
+        </td>
+      </tr>
+      <% _.each(docu.properties, function(property) { %>
+      <tr id="<%= property['@id'] %>">
+        <th><%= property.label %></th>
+        <td>
+          <code title="<%- property.range %>"><% if (property.range) { print(_.escape((property.rangeLabel) ? property.rangeLabel : property.range)); } else { print('<span class="muted">not&nbsp;specified</span>'); }; %></code>
+          <% if (property.readonly) { %><br /><small class="muted">readonly</small><% } %>
+          <% if (property.writeonly) { %><br /><small class="muted">writeonly</small><% } %>
+        </td>
+        <td>
+          <%= property.description.replace(/\n/g, '<br>') %><% if (property.supportedOperations.length > 0) { %><br />
+          <a class="btn btn-link btn-small operations" data-iri="<%- property['@id'] %>" href="#"><i class="icon-tags icon"></i> Operations</a>
+          <% } %>
+        </td>
+      </tr>
+      <% }); %>
+      </tbody>
+    </table>
+</script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.2.2/bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.3/underscore-min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/0.9.10/backbone-min.js"></script>
+<script src="js/hydra.js"></script>
 </body>
 </html>
