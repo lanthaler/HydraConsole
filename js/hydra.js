@@ -254,7 +254,6 @@
           result += indent;
         }
         result += ']';
-        result += (last) ? '' : ',';
       } else if (_.isObject(data)) {
         if ('__orig_value' in data) {
           result += '<span';
