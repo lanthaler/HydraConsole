@@ -97,6 +97,7 @@ $frameApiDocumentation = function(&$document, &$headers)
   "@context": [
     {
       "hydra": "http://purl.org/hydra/core#",
+      "xsd": "http://www.w3.org/2001/XMLSchema#",
       "ApiDocumentation": "hydra:ApiDocumentation",
       "hydra:Class": "hydra:Class",
       "property": { "@id": "hydra:property", "@type": "@id" },
@@ -109,7 +110,7 @@ $frameApiDocumentation = function(&$document, &$headers)
       "expects": { "@id": "hydra:expects", "@type": "@id" },
       "returns": { "@id": "hydra:returns", "@type": "@id" },
       "statusCodes": { "@id": "hydra:statusCodes", "@container": "@set" },
-      "code": "hydra:statusCode",
+      "code": { "@id": "hydra:statusCode", "@type": "xsd:integer" },
       "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
       "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
       "label": "rdfs:label",
