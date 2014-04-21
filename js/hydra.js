@@ -62,7 +62,7 @@
             '@id': url,
             'label': url.substr(url.indexOf('#') + 1).toLowerCase()
           }
-        } else if (0 === url.indexOf('http://purl.org/hydra/core#')) {
+        } else if (0 === url.indexOf('http://www.w3.org/ns/hydra/core#')) {
           return {
             '@id': url,
             'label': url.substr(url.indexOf('#') + 1)

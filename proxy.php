@@ -96,7 +96,7 @@ $frameApiDocumentation = function(&$document, &$headers)
 {
   "@context": [
     {
-      "hydra": "http://purl.org/hydra/core#",
+      "hydra": "http://www.w3.org/ns/hydra/core#",
       "ApiDocumentation": "hydra:ApiDocumentation",
       "hydra:Class": "hydra:Class",
       "property": { "@id": "hydra:property", "@type": "@id" },
