@@ -78,6 +78,24 @@
         }
       }
 
+      if (element && element.range) {
+        var rangeDef = this.getElementDefinition(element.range, vocab);
+
+        if (rangeDef.supportedOperations || (rangeDef.supportedOperations.length > 0)) {
+          if (!element.supportedOperations) {
+            element.supportedOperations = rangeDef.supportedOperations;
+          } else {
+            element.supportedOperations = _.uniq(
+              element.supportedOperations.concat(rangeDef.supportedOperations),
+              false,
+              function(val) {
+                return val['@id'];
+              }
+            );
+          }
+        }
+      }
+
       return element;
     },
 
