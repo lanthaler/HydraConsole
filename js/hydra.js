@@ -52,6 +52,9 @@
     getElementDefinition: function(url, vocab) {
       vocab = vocab || this.get('vocab');
 
+      if (!url)
+        return;  // TODO Ensure this never happens
+
       var element = _.find(vocab, function(entry) {
         return entry['@id'] === url;
       });
