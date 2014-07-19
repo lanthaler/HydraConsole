@@ -528,42 +528,41 @@
 
       $('#load').removeClass('btn-inverse');
 
-      var jqxhr = self.invokeRequest(method, url,
-        data).done(function(resource, textStatus, jqXHR) {
-          //self.vent.trigger('response', { resource: resource });
+      self.invokeRequest(method, url, data).done(function(resource, textStatus, jqXHR) {
+        //self.vent.trigger('response', { resource: resource });
 
-          if (resource.trim().length > 0) {
-            resource = JSON.parse(resource);
+        if (resource.trim().length > 0) {
+          resource = JSON.parse(resource);
 
-            self.response.model.set({
-              data: resource,
-              headers: self.getHeaders(jqXHR)
-            });
+          self.response.model.set({
+            data: resource,
+            headers: self.getHeaders(jqXHR)
+          });
 
-            if (_.isObject(resource) && ('@type' in resource)) {
-              self.showDocumentation(resource['@type'].__value.__value['@id']);
-            }
-          } else {
-            self.response.model.set({
-              data: null,
-              headers: self.getHeaders(jqXHR)
-            });
+          if (_.isObject(resource) && ('@type' in resource)) {
+            self.showDocumentation(resource['@type'].__value.__value['@id']);
           }
-
-          if (jqXHR.getResponseHeader('Content-Location')) {
-            self.addressbar.setUrl(jqXHR.getResponseHeader('Content-Location'));
-          } else {
-            self.addressbar.setUrl(url);
-          }
-        }).fail(function(jqXHR) {
+        } else {
           self.response.model.set({
             data: null,
             headers: self.getHeaders(jqXHR)
           });
+        }
+
+        if (jqXHR.getResponseHeader('Content-Location')) {
+          self.addressbar.setUrl(jqXHR.getResponseHeader('Content-Location'));
+        } else {
           self.addressbar.setUrl(url);
-        }).always(function() {
-          $('#load').addClass('btn-inverse');
+        }
+      }).fail(function(jqXHR) {
+        self.response.model.set({
+          data: null,
+          headers: self.getHeaders(jqXHR)
         });
+        self.addressbar.setUrl(url);
+      }).always(function() {
+        $('#load').addClass('btn-inverse');
+      });
     },
 
     getHeaders: function(jqXHR) {
@@ -581,9 +580,7 @@
         'dataType': 'text'
       };
 
-      var jqxhr = $.ajax('proxy.php?debug=true&url=' + encodeURI(url), settings);
-
-      return jqxhr;
+      return $.ajax('proxy.php?debug=true&url=' + encodeURI(url), settings);
     },
 
     showDocumentation: function(url) {
