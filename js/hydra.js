@@ -575,7 +575,7 @@
 
       var settings = {
         'type': method || 'GET',
-        'headers': headers || null,
+        'headers': headers || { 'Accept': 'application/ld+json, application/json;q=0.1' },
         'processData': false,
         'data': data || null,
         'dataType': 'text'
