@@ -164,14 +164,12 @@ tracker at <a href="http://www.markus-lanthaler.com/hydra/api-demo/" data-action
           </td>
         </tr>
       <% if (selected) { %>
+        <% if (operations[selected].description) { %>
         <tr>
           <td>Description:</td>
-          <td><% if (operations[selected].description) { %>
-            <%- operations[selected].description %>
-          <% } else { %>
-            <span class="muted">n/a</span>
-          <% } %></td>
+          <td><%- operations[selected].description %></td>
         </tr>
+        <% } %></td>
         <tr>
           <td>Expects:</td>
           <td><% if (operations[selected].expects) { %>
