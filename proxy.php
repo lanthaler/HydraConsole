@@ -112,6 +112,8 @@ $frameApiDocumentation = function(&$document, &$headers)
       "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
       "label": "rdfs:label",
       "description": "rdfs:comment",
+      "hydra_title": "hydra:title",
+      "hydra_description": "hydra:description",
       "domain": { "@id": "rdfs:domain", "@type": "@id" },
       "range": { "@id": "rdfs:range", "@type": "@id" }
     },

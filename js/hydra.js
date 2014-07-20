@@ -36,13 +36,22 @@
         def.readonly = ('readonly' in entry) ? entry.readonly : false;
         def.writeonly = ('writeonly' in entry) ? entry.writeonly : false;
 
+        if (entry.hydra_title) {
+          def.label = entry.hydra_title;
+        }
+        if (entry.hydra_description) {
+          def.description = entry.hydra_description;
+        }
+
         return def;
       });
 
       for (var i = type.properties.length - 1; i >= 0; i--) {
         var rangeDef = this.getElementDefinition(type.properties[i].range);
         if (rangeDef) {
-          type.properties[i]['rangeLabel'] = rangeDef.label;
+          type.properties[i]['rangeLabel'] = (rangeDef.hydra_title)
+            ? rangeDef.hydra_title
+            : rangeDef.label;
         }
       }
 
@@ -58,6 +67,16 @@
       var element = _.find(vocab, function(entry) {
         return entry['@id'] === url;
       });
+
+      if (element) {
+        if (element.hydra_title) {
+          element.label = element.hydra_title;
+        }
+        if (element.hydra_description) {
+          element.description = element.hydra_description;
+        }
+      }
+
 
       if (!element || !element.label) {
         if (0 === url.indexOf('http://www.w3.org/2001/XMLSchema#')) {
@@ -104,6 +123,15 @@
 
       var types = _.filter(vocab, function(entry) {
         return (('rdfs:Class' === entry['@type']) || ('hydra:Class' === entry['@type']));
+      });
+
+      _.each(types, function(type) {
+        if (type.hydra_title) {
+          type.label = type.hydra_title;
+        }
+        if (type.hydra_description) {
+          type.description = type.hydra_description;
+        }
       });
 
       return types;
