@@ -699,23 +699,22 @@ $('#addressbar').on("submit", function () {
     return false;
 });
 
-$('#response').on("mouseenter", ".prop", function () {
+$('#response').on("mouseenter", ".prop", function (event) {
     var property = $(this).attr('data-iri');
-
-    if (property && (0 === property.indexOf('http://'))) {
-      window.HydraClient.showDocumentation(property);
-
-      if (document.getElementById(property)) {
-        $(document.getElementById(property)).addClass("prop-highlight");
-      }
+    if (property && document.getElementById(property)) {
+      $(document.getElementById(property)).addClass("prop-highlight");
     }
+
+    event.stopPropagation();
 });
 
-$('#response').on("mouseleave", ".prop", function () {
+$('#response').on("mouseleave", ".prop", function (event) {
     var property = $(this).attr('data-iri');
     if (property && document.getElementById(property)) {
       $(document.getElementById(property)).removeClass("prop-highlight");
     }
+
+    event.stopPropagation();
 });
 
 
