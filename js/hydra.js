@@ -345,8 +345,13 @@
             result += '<br>';
           } else {
             if ('__iri' in value) {
+              var reverse = '';
+              if ('^' === value.__iri[0]) {
+                value.__iri = value.__iri.substr(1);
+                reverse = 'reverse of ';
+              }
               result += '<span class="prop" data-iri="' + _.escape(value.__iri);
-              result += '">&quot;<span class="prop-key" title="' + _.escape(value.__iri) + '">' + _.escape(key);
+              result += '">&quot;<span class="prop-key" title="' + _.escape(reverse + value.__iri) + '">' + _.escape(key);
               result += '</span>&quot;: ';
             }
 
