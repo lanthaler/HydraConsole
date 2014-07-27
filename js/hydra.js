@@ -587,8 +587,8 @@
 
       self.invokeRequest(method, url, data).done(function(resource, textStatus, jqXHR) {
         //self.vent.trigger('response', { resource: resource });
+        var linkHeaders = self.parseLinkHeader(jqXHR.getResponseHeader('Link'));
 
-        var linkHeaders = self.parseLinkHeader(jqXHR.getResponseHeader('Link'))
         if (linkHeaders['http://www.w3.org/ns/hydra/core#apiDocumentation']) {
           var apiDocUrl = linkHeaders['http://www.w3.org/ns/hydra/core#apiDocumentation'];
 
