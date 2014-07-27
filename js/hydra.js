@@ -382,6 +382,7 @@
     initialize: function() {
       this.model.bind('change:type', this.render, this);
       this.model.bind('change:vocab', this.updateAvailableTypes, this);
+      this.model.bind('change:vocab', this.render, this);
 
       this.details.on("click", ".operations", function () {
         window.HydraClient.showOperationsModal([ $(this).attr('data-iri') ], null);
@@ -401,11 +402,13 @@
 
     render: function() {
       var type = this.model.get('type');
+      var vocab = this.model.get('vocab');
       var definition;
-      if (null === type) {
+
+      if (null === vocab) {
         this.title.html('');
         this.details.html('<p>Loading ...</p>');
-      } else if ((false === type) || (null === (definition = this.model.getTypeDefinition(this.model.get('type'))))) {
+      } else if ((false === vocab) || (null === (definition = this.model.getTypeDefinition(type)))) {
         this.title.html('');
         this.details.html('<p>Loading the documentation failed.</p>');
       } else {
@@ -585,6 +588,23 @@
       self.invokeRequest(method, url, data).done(function(resource, textStatus, jqXHR) {
         //self.vent.trigger('response', { resource: resource });
 
+        var linkHeaders = self.parseLinkHeader(jqXHR.getResponseHeader('Link'))
+        if (linkHeaders['http://www.w3.org/ns/hydra/core#apiDocumentation']) {
+          var apiDocUrl = linkHeaders['http://www.w3.org/ns/hydra/core#apiDocumentation'];
+
+          if (apiDocUrl !== self.documentation.model.get('vocabUrl')) {
+            self.documentation.model.set({ 'vocab': null, 'vocabUrl': null });
+
+            var jqxhr = $.getJSON('proxy.php', { 'url': apiDocUrl, 'vocab': 1 }, function(resource) {
+              //self.vent.trigger('response', { resource: resource });
+              var apiDoc = resource['@graph'];
+              self.documentation.model.set({'vocab': apiDoc, 'vocabUrl': apiDocUrl });
+            }).error(function() {
+              self.documentation.model.set({ 'vocab': false, 'vocabUrl': null });
+            });
+          }
+        }
+
         if (resource.trim().length > 0) {
           resource = JSON.parse(resource);
 
@@ -637,6 +657,36 @@
       return $.ajax('proxy.php?debug=true&url=' + encodeURI(url), settings);
     },
 
+    parseLinkHeader: function(header) {
+      var links = {};
+
+      if (!header || (0 === header.trim().length)) {
+        return links;
+      }
+
+      var parts = header.split(',');
+
+      for(var i = parts.length - 1; i >= 0; i--) {
+        var params = parts[i].split(';');
+        var url, rel;
+        for (var j = params.length - 1; j >= 0; j--) {
+          if ('<' === params[j].trim()[0]) {
+            url = params[j].trim().slice(1, -1);
+          } else {
+            var p = params[j].split('=');
+            if ((2 === p.length) && ('rel' === p[0].trim())) {
+              rel = p[1].trim().slice(1, -1);
+            }
+          }
+        }
+        if (url && rel) {
+          links[rel] = url;
+        }
+      }
+
+      return links;
+    },
+
     showDocumentation: function(url) {
       var self = this;
 
@@ -644,25 +694,7 @@
         return;
       }
 
-
-      if (self.documentation.model.getTypeDefinition(url)) {
-        self.documentation.model.set({ 'type' : url });
-
-        return;
-      }
-
-      self.documentation.model.set({ 'type' : null });
-
-      var vocabUrl = url.split('#', 2)[0];
-      var jqxhr = $.getJSON('proxy.php', { 'url': vocabUrl, 'vocab': 1 }, function(resource) {
-        //self.vent.trigger('response', { resource: resource });
-        // TODO Merge the vocabulary into the documentation model
-        var vocab = resource['@graph'];
-
-        self.documentation.model.set({ 'type' : url, 'vocab': vocab, 'vocabUrl': vocabUrl });
-      }).error(function() {
-        self.documentation.model.set({ 'type' : false, 'vocab': null, 'vocabUrl': null });
-      });
+      self.documentation.model.set({ 'type' : url });
     },
 
     getElementDefinition: function(url, vocab) {
@@ -700,21 +732,6 @@
           }
 
           showModal();
-        } else {
-          var vocabUrl = elementIri.split('#', 2)[0];
-          var jqxhr = $.getJSON('proxy.php', { 'url': vocabUrl, 'vocab': 1 }, function(resource) {
-            // TODO Merge the vocabulary into the documentation model
-            var vocab = resource['@graph'];
-            element = self.documentation.model.getElementDefinition(elementIri, vocab);
-
-            if ('supportedOperations' in element) {
-              operations = _.union(operations, element.supportedOperations);
-            }
-          }).fail(function() {
-            alert("Can't find documentation for property " + elements);
-          }).always(function() {
-            showModal();
-          });
         }
       });
     }
