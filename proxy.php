@@ -5,6 +5,7 @@ require('vendor/autoload.php');
 
 ini_set('html_errors', 0);
 
+use ML\IRI\IRI;
 use ML\JsonLD\JsonLD;
 use ML\JsonLD\Processor;
 
@@ -34,6 +35,42 @@ if(!function_exists('apache_request_headers')) {
   }
 }
 
+// Parse HTTP Link header to get referenced context
+function parseContextLinkHeaders(array $values, IRI $baseIri)
+{
+  // Separate multiple links contained in a single header value
+  for ($i = 0, $total = count($values); $i < $total; $i++) {
+    if (strpos($values[$i], ',') !== false) {
+      foreach (preg_split('/,(?=([^"]*"[^"]*")*[^"]*$)/', $values[$i]) as $v) {
+        $values[] = trim($v);
+      }
+      unset($values[$i]);
+    }
+  }
+
+  $contexts = $matches = array();
+  $trimWhitespaceCallback = function ($str) {
+    return trim($str, "\"'  \n\t");
+  };
+
+  // Split the header in key-value pairs
+  foreach ($values as $val) {
+    $part = array();
+    foreach (preg_split('/;(?=([^"]*"[^"]*")*[^"]*$)/', $val) as $kvp) {
+      preg_match_all('/<[^>]+>|[^=]+/', $kvp, $matches);
+      $pieces = array_map($trimWhitespaceCallback, $matches[0]);
+      $part[$pieces[0]] = isset($pieces[1]) ? $pieces[1] : '';
+    }
+
+    if (in_array('http://www.w3.org/ns/json-ld#context', explode(' ', $part['rel']))) {
+      $contexts[] = (string) $baseIri->resolve(trim(key($part), '<> '));
+    }
+  }
+
+  return array_values(array_unique($contexts));
+}
+
+
 $options = new \stdClass();
 $options->base = $_GET['url'];
 
@@ -47,12 +84,36 @@ $debugExpansion = function(&$document, &$headers)
     $headers['Location'] = $_SERVER['SCRIPT_NAME'] . '?' . http_build_query($_GET);
   }
 
-  if ((isset($headers['Content-Type']) && (false === strpos($headers['Content-Type'], 'application/ld+json'))) ||
-    (0 === strlen(trim($document)))) {
+  $linkHeader = false;
+  if (isset($headers['Link'])) {
+    $linkHeader = parseContextLinkHeaders((array)$headers['Link'], new IRI($_GET['url']));
+
+    $linkHeader = (count($linkHeader) === 1)
+      ? reset($linkHeader)
+      : false;
+  }
+
+  $passThrough =
+    (0 === strlen(trim($document))) ||                     // if the body is empty (nothing to do)
+    (false === isset($headers['Content-Type'])) ||         // not content type has been set
+    (                                                     // or the content type is
+      (false === strpos($headers['Content-Type'], 'application/ld+json')) &&  // neither application/ld+json
+      !($linkHeader &&                                                        // nor a response with an HTTP Link header
+        ((false !== strpos($headers['Content-Type'], 'application/json')) ||  // and a content type of application/json
+         (false !== strpos($headers['Content-Type'], '+json')))               // or any +json content content type
+      )
+    );
+
+  if ($passThrough) {
     return;
   }
 
   global $options;
+
+  if ($linkHeader && (false === @strpos($headers['Content-Type'], 'application/ld+json'))) {
+    $options->expandContext = $linkHeader;
+  }
+
   try
   {
     $document = JsonLD::toString(JsonLD::expand($document, $options, true));
