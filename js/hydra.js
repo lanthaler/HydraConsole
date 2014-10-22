@@ -344,7 +344,7 @@
             result += (i === keys.length - 1) ? '' : ',';
             result += '<br>';
           } else {
-            if ('__iri' in value) {
+            if (value.__iri) {
               var reverse = '';
               if ('^' === value.__iri[0]) {
                 value.__iri = value.__iri.substr(1);
@@ -352,6 +352,10 @@
               }
               result += '<span class="prop" data-iri="' + _.escape(value.__iri);
               result += '">&quot;<span class="prop-key" title="' + _.escape(reverse + value.__iri) + '">' + _.escape(key);
+              result += '</span>&quot;: ';
+            } else {
+              result += '<span class="not-mapped-prop">&quot;<span class="prop-key" title="not mapped to an IRI">';
+              result += _.escape(key);
               result += '</span>&quot;: ';
             }
 
