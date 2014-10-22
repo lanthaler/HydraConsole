@@ -62,7 +62,7 @@ function parseContextLinkHeaders(array $values, IRI $baseIri)
       $part[$pieces[0]] = isset($pieces[1]) ? $pieces[1] : '';
     }
 
-    if (in_array('http://www.w3.org/ns/json-ld#context', explode(' ', $part['rel']))) {
+    if (isset($part['rel']) && in_array('http://www.w3.org/ns/json-ld#context', explode(' ', $part['rel']))) {
       $contexts[] = (string) $baseIri->resolve(trim(key($part), '<> '));
     }
   }
