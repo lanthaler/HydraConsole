@@ -6,13 +6,17 @@ By specifying a number of commonly used concepts it renders the creation of
 generic API clients possible. The HydraConsole is such a generic API client
 in the form of a single-page web application.
 
+For a high level description of how the HydraConsole works, please refer to
+my dissertation
+[Third Generation Web APIs—Bridging the Gap between REST and Linked Data][2].
+
 
 Installation
 ------------
 
-At the moment, the HydraConsole uses a [JSON-LD Processor][2] and a proxy
+At the moment, the HydraConsole uses a [JSON-LD Processor][3] and a proxy
 written in PHP to access and process responses of Web APIs. Thus, the
-simplest way to install the HydraConsole is to use [Composer][3].
+simplest way to install the HydraConsole is to use [Composer][4].
 
 If you don't have Composer yet, download it following the instructions on
 http://getcomposer.org/ or just run the following command:
@@ -41,5 +45,6 @@ HydraConsole on my homepage: http://www.markus-lanthaler.com/hydra/
 
 
 [1]: http://www.markus-lanthaler.com/hydra/
-[2]: http://m.lanthi.com/json-ld
-[3]: http://getcomposer.org/
+[2]: http://m.lanthi.com/3gen-web-apis-p171
+[3]: http://m.lanthi.com/json-ld
+[4]: http://getcomposer.org/
