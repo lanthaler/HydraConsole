@@ -343,6 +343,11 @@
             result += '</span>';
             result += (i === keys.length - 1) ? '' : ',';
             result += '<br>';
+          } else if ('@value' === key) {
+              result += '<span class="prop">&quot;<span class="prop-key" title="@value">@value</span>&quot;: ';
+              result += this.renderResponse(value, indent + '  ',  (i === keys.length - 1));
+              result += '</span>';
+              continue;
           } else {
             if (value.__iri) {
               var reverse = '';
