@@ -121,9 +121,17 @@
     getTypes: function(vocab) {
       vocab = vocab || this.get('vocab');
 
-      var types = _.filter(vocab, function(entry) {
-        return (('rdfs:Class' === entry['@type']) || ('hydra:Class' === entry['@type']));
+      var isHydraClass = function (t) { return (('rdfs:Class' === t) || ('hydra:Class' === t)); };
+      var types = _.map(vocab, function (entry) {
+          var types = entry['@type'];
+          if (_.isArray(types)) {
+              return _.find(types, isHydraClass) ? entry : null;
+          } else {
+              return isHydraClass(types) ? entry : null;
+          }
       });
+      types = _.filter(types, function (t) { return t != null; });
+
 
       _.each(types, function(type) {
         if (type.hydra_title) {
