@@ -28,10 +28,13 @@ and install all it's dependencies:
 
     php composer.phar create-project -s dev ml/hydra-console path/to/install
 
+Launch the PHP's built-in web server:
+
+    php -S 127.0.0.1:8000 -t path/to/install
+
 That's all. Just fire up your browser and point it to
 
-    http://localhost/path/to/install/
-
+    http://localhost:8000
 
 Collaboration
 ------------
