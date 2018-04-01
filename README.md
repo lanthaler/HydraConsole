@@ -28,13 +28,14 @@ and install all it's dependencies:
 
     php composer.phar create-project -s dev ml/hydra-console path/to/install
 
-Launch the PHP's built-in web server:
+You can now serve the HydraConsole with PHP's built-in web server:
 
     php -S localhost:8000 -t path/to/install
 
-That's all. Just fire up your browser and point it to
+That's it. Just fire up your browser and point it to
 
     http://localhost:8000
+
 
 Collaboration
 ------------
