@@ -30,7 +30,7 @@ and install all it's dependencies:
 
 Launch the PHP's built-in web server:
 
-    php -S 127.0.0.1:8000 -t path/to/install
+    php -S localhost:8000 -t path/to/install
 
 That's all. Just fire up your browser and point it to
 
